@@ -21,6 +21,7 @@ import app.ash.intelligence.PriorityEngine.DeadlineKind
 import app.ash.intelligence.SubscriptionDetector
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 sealed interface AttentionTarget {
@@ -75,7 +76,7 @@ class GetAttentionFeedUseCase @Inject constructor(
         records.observeTransactions(5),
     ) { recordList, entities, docs, txns ->
         build(recordList, entities.policies, entities.vehicles, entities.warranties, entities.subscriptions, docs, txns)
-    }
+    }.flowOn(kotlinx.coroutines.Dispatchers.Default) // scoring never runs on the main thread
 
     private data class Quad(val policies: List<InsurancePolicy>, val vehicles: List<Vehicle>, val warranties: List<Warranty>, val subscriptions: List<Subscription>)
 
@@ -124,7 +125,8 @@ class GetAttentionFeedUseCase @Inject constructor(
             val result = score(Category.DOCUMENTS, Importance.HIGH, expires, DeadlineKind.EXPIRES)
             items += AttentionItem("d${d.id}", d.title, Category.DOCUMENTS, AttentionKind.EXPIRY, null, expires, DeadlineKind.EXPIRES, result, AttentionTarget.DocumentTarget(d.id))
         }
-        for (w in warranties) {
+        // A warranty that ended over a week ago is no longer actionable.
+        for (w in warranties.filter { it.expiresAt >= now - 7L * 24 * 60 * 60 * 1000 }) {
             val result = score(Category.DOCUMENTS, Importance.MEDIUM, w.expiresAt, DeadlineKind.EXPIRES)
             items += AttentionItem("w${w.id}", w.product, Category.DOCUMENTS, AttentionKind.EXPIRY, null, w.expiresAt, DeadlineKind.EXPIRES, result, AttentionTarget.WarrantyTarget(w.id))
         }

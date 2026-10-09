@@ -36,6 +36,15 @@ android {
                 "proguard-rules.pro"
             )
         }
+        // Release-speed build (R8, no debugging overhead) signed with the local debug key, so it can
+        // be installed on a test phone to judge real smoothness. Never upload this to Play.
+        create("staging") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

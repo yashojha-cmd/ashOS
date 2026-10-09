@@ -35,6 +35,9 @@ interface ReminderDao {
     @Query("SELECT * FROM reminders WHERE state IN ('SCHEDULED','SNOOZED') AND fireAt > :after")
     suspend fun pendingAfter(after: Long): List<ReminderEntity>
 
+    @Query("SELECT * FROM reminders WHERE state IN ('SCHEDULED','SNOOZED')")
+    suspend fun pendingAll(): List<ReminderEntity>
+
     @Query("SELECT * FROM reminders WHERE target = :target AND targetId = :targetId")
     suspend fun forTarget(target: ReminderTarget, targetId: Long): List<ReminderEntity>
 

@@ -42,6 +42,7 @@ import app.ash.designsystem.AshRow
 import app.ash.designsystem.AshScaffold
 import app.ash.designsystem.EmptyState
 import app.ash.designsystem.GroupedSection
+import app.ash.designsystem.groupedItems
 import app.ash.designsystem.docTypeLabel
 import app.ash.designsystem.expiresText
 import app.ash.designsystem.periodLabel
@@ -85,6 +86,8 @@ fun SearchScreen(navigate: (Any) -> Unit) {
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle()
     val focus = remember { FocusRequester() }
+    val recordsHeader = stringResource(R.string.search_records)
+    val documentsHeader = stringResource(R.string.vault_title)
     LaunchedEffect(Unit) { focus.requestFocus() }
 
     AshScaffold(title = stringResource(R.string.search_title)) { padding ->
@@ -117,31 +120,24 @@ fun SearchScreen(navigate: (Any) -> Unit) {
                     Text(pluralStringResource(R.plurals.search_count, r.total, r.total), style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 20.dp, top = 8.dp))
                 }
-                results(r, navigate)
+                results(r, navigate, recordsHeader, documentsHeader)
             }
         }
     }
 }
 
-private fun androidx.compose.foundation.lazy.LazyListScope.results(r: SearchResults, navigate: (Any) -> Unit) {
-    if (r.records.isNotEmpty()) item {
-        GroupedSection(header = stringResource(R.string.search_records)) {
-            r.records.forEachIndexed { i, rec ->
-                AshRow(
-                    title = rec.title,
-                    subtitle = listOfNotNull(rec.amountPaise?.let { Money.format(it) }, statusLabel(rec.status), relativeDay(rec.eventAt ?: rec.dueAt ?: rec.createdAt)).joinToString(" · "),
-                    icon = AshIcons.category(rec.category), showDivider = i < r.records.lastIndex, onClick = { navigate(RecordRoute(rec.id)) },
-                )
-            }
-        }
+private fun androidx.compose.foundation.lazy.LazyListScope.results(r: SearchResults, navigate: (Any) -> Unit, recordsHeader: String, documentsHeader: String) {
+    // Records and documents can be long, so they are lazy rows; the rest are small entity tables.
+    groupedItems(r.records, key = { "r${it.id}" }, header = recordsHeader) { rec, last ->
+        AshRow(
+            title = rec.title,
+            subtitle = listOfNotNull(rec.amountPaise?.let { Money.format(it) }, statusLabel(rec.status), relativeDay(rec.eventAt ?: rec.dueAt ?: rec.createdAt)).joinToString(" · "),
+            icon = AshIcons.category(rec.category), showDivider = !last, onClick = { navigate(RecordRoute(rec.id)) },
+        )
     }
-    if (r.documents.isNotEmpty()) item {
-        GroupedSection(header = stringResource(R.string.vault_title)) {
-            r.documents.forEachIndexed { i, d ->
-                AshRow(d.title, subtitle = listOfNotNull(docTypeLabel(d.docType), d.expiresAt?.let { expiresText(it) }).joinToString(" · "),
-                    icon = AshIcons.category(app.ash.domain.model.Category.DOCUMENTS), showDivider = i < r.documents.lastIndex, onClick = { navigate(DocumentRoute(d.id)) })
-            }
-        }
+    groupedItems(r.documents, key = { "d${it.id}" }, header = documentsHeader) { d, last ->
+        AshRow(d.title, subtitle = listOfNotNull(docTypeLabel(d.docType), d.expiresAt?.let { expiresText(it) }).joinToString(" · "),
+            icon = AshIcons.category(app.ash.domain.model.Category.DOCUMENTS), showDivider = !last, onClick = { navigate(DocumentRoute(d.id)) })
     }
     if (r.policies.isNotEmpty()) item {
         GroupedSection(header = stringResource(R.string.policies_title)) {

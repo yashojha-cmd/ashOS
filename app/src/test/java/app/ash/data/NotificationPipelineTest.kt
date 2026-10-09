@@ -171,6 +171,36 @@ class NotificationPipelineTest {
         val counters = diagnostics.counters.first()
         assertThat(counters[Counters.NOTIFICATIONS_SENSITIVE]).isEqualTo(1)
         assertThat(counters[Counters.NOTIFICATIONS_DUPLICATE]).isEqualTo(1)
+
+        // 13. Reopening a handled bill brings its reminders back.
+        records.setStatus(bill.recordId, RecordStatus.ACTION_REQUIRED)
+        assertThat(db.reminderDao().forTarget(app.ash.domain.model.ReminderTarget.RECORD, bill.recordId)).isNotEmpty()
+
+        // 14. With "keep original text" off, no notification wording is stored anywhere.
+        settings.setStoreOriginalText(false)
+        assertThat(post(sms, "Airtel", "Your Airtel postpaid bill of Rs 799 is due on 20 Oct. Pay now.")).isEqualTo(Result.CREATED)
+        val airtel = db.recordDao().search("airtel*").single()
+        assertThat(airtel.summary).isEmpty()
+        assertThat(airtel.extrasJson.orEmpty()).doesNotContain("postpaid")
+        assertThat(db.notificationDao().getById(airtel.notificationId!!)?.text).isNull()
+
+        // 15. Passed subscription renewals roll forward by whole periods.
+        val subId = life.saveSubscription(
+            app.ash.domain.model.Subscription(
+                name = "Spotify", amountPaise = 11_900, period = app.ash.domain.model.RecurrencePeriod.MONTHLY,
+                nextRenewalAt = app.ash.common.Dates.morningOf(LocalDate.of(2026, 9, 5), time.zone()),
+            ),
+        )
+        assertThat(life.rollRenewals()).isEqualTo(1)
+        val rolled = life.getSubscription(subId)!!.nextRenewalAt!!
+        assertThat(app.ash.common.Dates.toLocalDate(rolled, time.zone())).isEqualTo(LocalDate.of(2026, 11, 5))
+
+        // 16. Warranties that ended over a week ago drop off Home; ones ending soon show up.
+        life.saveWarranty(app.ash.domain.model.Warranty(product = "Old TV", expiresAt = time.nowMillis() - 30L * 24 * 60 * 60 * 1000))
+        life.saveWarranty(app.ash.domain.model.Warranty(product = "New phone", expiresAt = time.nowMillis() + 5L * 24 * 60 * 60 * 1000))
+        val titles = GetAttentionFeedUseCase(records, life, EmptyDocuments, time)().first().let { f -> (f.needsAttention + f.comingUp).map { it.title } }
+        assertThat(titles).contains("New phone")
+        assertThat(titles).doesNotContain("Old TV")
     }
 
     private object EmptyDocuments : DocumentRepository {

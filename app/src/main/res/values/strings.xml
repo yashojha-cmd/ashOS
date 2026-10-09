@@ -295,7 +295,7 @@
     <string name="field_relation">Relationship</string>
     <string name="field_route">Route</string>
     <string name="field_sensitive">Sensitive document</string>
-    <string name="field_sensitive_desc">Hidden from search previews</string>
+    <string name="field_sensitive_desc">Ask for fingerprint or PIN before opening</string>
     <string name="field_source">Source</string>
     <string name="field_start">Start date</string>
     <string name="field_tags">Tags</string>
@@ -409,6 +409,7 @@
     <string name="vault_locked_body">Unlock with your fingerprint or screen lock to see your documents.</string>
     <string name="vault_no_lock">Your phone has no screen lock, so the vault cannot be protected. Set one in system settings.</string>
     <string name="vault_prompt_title">Open Vault</string>
+    <string name="gate_locked_title">Protected</string>
     <string name="vault_reading">Encrypting and reading the document…</string>
     <string name="vault_scan_title">Scan %1$s</string>
     <string name="vault_untitled">Document</string>

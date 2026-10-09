@@ -102,7 +102,9 @@ class RecordRepositoryImpl @Inject constructor(
         mergeIntoExisting(signal, status, now)?.let { return it to status }
 
         val record = Record(
-            type = signal.type, category = signal.category, title = signal.title, summary = signal.summary,
+            type = signal.type, category = signal.category, title = signal.title,
+            // With "Keep original notification text" off, no notification wording is kept at all.
+            summary = if (originalText == null) "" else signal.summary,
             merchant = signal.merchant, amountPaise = signal.amountPaise, dueAt = signal.dueAt, eventAt = signal.eventAt,
             expiresAt = signal.expiresAt, reference = signal.reference, importance = signal.importance, status = status,
             confidence = signal.confidence, source = RecordSource.NOTIFICATION, sourcePackage = sourcePackage,
@@ -110,7 +112,8 @@ class RecordRepositoryImpl @Inject constructor(
         )
         val id = records.insert(record.toEntity(now))
         if (auto) materialize(record.copy(id = id))
-        if (signal.type == RecordType.BILL && signal.alreadyHandled) closeOpenBills(signal.title, now)
+        // Only a confident "bill paid" may close other bills; uncertain ones wait for the user.
+        if (auto && signal.type == RecordType.BILL && signal.alreadyHandled) closeOpenBills(signal.title, now)
         return id to status
     }
 
@@ -204,6 +207,10 @@ class RecordRepositoryImpl @Inject constructor(
         if (status == RecordStatus.HANDLED || status == RecordStatus.ARCHIVED) {
             reminders.cancelForTarget(ReminderTarget.RECORD, id)
             if (bills.get(id) != null) bills.markPaid(id, now)
+        } else if (status == RecordStatus.UNREAD || status == RecordStatus.ACTION_REQUIRED) {
+            // Reopening brings the reminders back.
+            if (bills.get(id)?.paidAt != null) bills.markPaid(id, null)
+            records.getById(id)?.toDomain()?.let { planRecordReminders(it) }
         }
         if (status == RecordStatus.ARCHIVED) diagnostics.audit(AuditAction.DISMISS, "record", id)
     }

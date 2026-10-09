@@ -2,6 +2,7 @@ package app.ash.presentation.lock
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -83,7 +84,7 @@ fun LockScreen(onUnlocked: () -> Unit, onUnavailable: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.safeDrawingPadding().padding(32.dp),
         ) {
-            Box(Modifier.size(96.dp).clip(RoundedCornerShape(28.dp)).background(MaterialTheme.colorScheme.inverseSurface)) {
+            Box(Modifier.size(96.dp).clip(RoundedCornerShape(28.dp)).background(app.ash.designsystem.BrandGraphite).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(28.dp))) {
                 Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = stringResource(R.string.cd_ash_logo), modifier = Modifier.size(96.dp))
             }
             Spacer(Modifier.height(24.dp))

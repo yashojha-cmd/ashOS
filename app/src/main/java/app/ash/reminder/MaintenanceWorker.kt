@@ -51,13 +51,14 @@ class MaintenanceWorker @AssistedInject constructor(
         val dropped = notifications.deleteUnlinkedBefore(now - 90 * DAY)
         audit.deleteBefore(now - 365 * DAY)
         val detected = life.detectSubscriptions()
+        val rolled = life.rollRenewals()
         val s = settings.current()
         if (s.detailedLogsUntil in 1 until now) {
             settings.setDetailedLogsUntil(0)
             AshLogger.detailedParserLogging = false
         }
         settings.setLastMaintenance(now)
-        AshLogger.i(TAG, "Maintenance: purged=$purged droppedNotifications=$dropped subscriptionsDetected=$detected")
+        AshLogger.i(TAG, "Maintenance: purged=$purged droppedNotifications=$dropped subscriptionsDetected=$detected renewalsRolled=$rolled")
         Result.success()
     } catch (e: Exception) {
         AshLogger.e(TAG, "Maintenance failed", e)

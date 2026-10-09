@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -111,7 +110,7 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
     val navigate: (Any) -> Unit = { route -> nav.navigate(route) { launchSingleTop = true } }
     val back: () -> Unit = { nav.popBackStack() }
     val goHome: () -> Unit = {
-        nav.navigate(HomeRoute) { popUpTo(0) { inclusive = true } }
+        nav.navigate(HomeRoute) { popUpTo(nav.graph.id) { inclusive = true } }
     }
 
     // Decided once; later changes (finishing onboarding, delete-all) navigate explicitly
@@ -129,7 +128,8 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
                             selected = selected,
                             onClick = {
                                 nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                                    // Home is the root of the tab stack even when the app started on onboarding.
+                                    popUpTo<HomeRoute> { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
@@ -205,7 +205,7 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
             composable<LogsRoute> { LogsScreen(onBack = back) }
             composable<BackupRoute> {
                 BackupScreen(onBack = back, onDeletedAll = {
-                    nav.navigate(OnboardingRoute) { popUpTo(0) { inclusive = true } }
+                    nav.navigate(OnboardingRoute) { popUpTo(nav.graph.id) { inclusive = true } }
                 })
             }
         }

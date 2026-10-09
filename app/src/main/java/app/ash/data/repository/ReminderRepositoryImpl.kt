@@ -63,7 +63,8 @@ class ReminderRepositoryImpl @Inject constructor(
     override suspend fun rescheduleAll() {
         val exact = settings.current().exactReminders
         val now = time.nowMillis()
-        for (reminder in dao.pendingAfter(now - 60_000)) scheduler.schedule(reminder.id, reminder.fireAt, exact)
+        // Includes reminders that came due while the phone was off: they fire a few seconds from now.
+        for (reminder in dao.pendingAll()) scheduler.schedule(reminder.id, maxOf(reminder.fireAt, now + 5_000), exact)
     }
 
     /** Replaces pending automatic reminders for a target with a fresh plan. Idempotent. */

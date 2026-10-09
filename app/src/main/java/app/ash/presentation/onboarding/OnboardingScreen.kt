@@ -74,7 +74,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.size(132.dp).clip(RoundedCornerShape(36.dp)).background(
-                        if (page.icon == null) MaterialTheme.colorScheme.inverseSurface else MaterialTheme.colorScheme.primaryContainer,
+                        if (page.icon == null) app.ash.designsystem.BrandGraphite else MaterialTheme.colorScheme.primaryContainer,
                     ),
                 ) {
                     if (page.icon == null) {

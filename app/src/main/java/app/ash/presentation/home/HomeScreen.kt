@@ -115,7 +115,7 @@ fun HomeScreen(navigate: (Any) -> Unit) {
             }
         },
     ) { padding ->
-        LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 96.dp), modifier = Modifier.animateContentSize()) {
+        LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 96.dp)) {
             item {
                 Text(
                     stringResource(R.string.home_question),

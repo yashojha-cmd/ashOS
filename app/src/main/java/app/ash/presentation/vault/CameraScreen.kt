@@ -155,7 +155,8 @@ fun CameraScreen(onBack: () -> Unit, onSaved: (Long) -> Unit) {
                         controller.takePicture(ContextCompat.getMainExecutor(context), object : ImageCapture.OnImageCapturedCallback() {
                             override fun onCaptureSuccess(image: ImageProxy) {
                                 val rotation = image.imageInfo.rotationDegrees
-                                val raw = image.toBitmap()
+                                // Downscale the 12 MP frame first so rotation never doubles a ~48 MB bitmap.
+                                val raw = ImageTools.scaleToMax(image.toBitmap(), 2400)
                                 image.close()
                                 captured = if (rotation == 0) raw else Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, Matrix().apply { postRotate(rotation.toFloat()) }, true)
                             }

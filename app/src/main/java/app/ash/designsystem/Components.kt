@@ -154,6 +154,47 @@ fun GroupedSection(
     }
 }
 
+/**
+ * Grouped-list styling for lazy lists: each row is its own lazy item (only visible rows are
+ * composed), drawn with rounded corners on the first and last row so it still looks like one
+ * inset group. Use this instead of GroupedSection for lists that can grow long.
+ */
+fun <T> androidx.compose.foundation.lazy.LazyListScope.groupedItems(
+    items: List<T>,
+    key: (T) -> Any,
+    header: String? = null,
+    row: @Composable (item: T, isLast: Boolean) -> Unit,
+) {
+    if (items.isEmpty()) return
+    if (header != null) {
+        item(key = "header-$header") {
+            Text(
+                header.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 32.dp, top = 8.dp, bottom = 6.dp).semantics { heading() },
+            )
+        }
+    }
+    val lastIndex = items.lastIndex
+    items(items.size, key = { key(items[it]) }) { index ->
+        val radius = 22.dp
+        val shape = RoundedCornerShape(
+            topStart = if (index == 0) radius else 0.dp,
+            topEnd = if (index == 0) radius else 0.dp,
+            bottomStart = if (index == lastIndex) radius else 0.dp,
+            bottomEnd = if (index == lastIndex) radius else 0.dp,
+        )
+        Surface(
+            shape = shape,
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = if (index == lastIndex) 8.dp else 0.dp),
+        ) { row(items[index], index == lastIndex) }
+    }
+}
+
 @Composable
 fun AshRow(
     title: String,

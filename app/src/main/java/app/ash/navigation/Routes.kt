@@ -18,7 +18,7 @@ import kotlinx.serialization.Serializable
 @Serializable data class DocumentRoute(val id: Long)
 @Serializable data object CameraRoute
 @Serializable data object RemindersRoute
-@Serializable data class ReminderEditRoute(val id: Long = 0)
+@Serializable data class ReminderEditRoute(val id: Long = 0, val title: String = "")
 @Serializable data object MoneyRoute
 @Serializable data class SubscriptionEditRoute(val id: Long = 0)
 @Serializable data object VehiclesRoute

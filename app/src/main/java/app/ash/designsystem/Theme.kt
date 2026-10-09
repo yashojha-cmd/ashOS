@@ -136,3 +136,6 @@ fun AshTheme(mode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () -> Unit
 object AshTheme {
     val status: AshStatusColors @Composable get() = LocalAshStatus.current
 }
+
+/** The app-icon background, used wherever the logo appears so it always matches the launcher. */
+val BrandGraphite = Color(0xFF1B1E22)

@@ -72,7 +72,7 @@ fun PrivacyCenterScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
     val c by vm.counts.collectAsStateWithLifecycle()
     val strongBox by vm.strongBox.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val internet = vm.hasInternetPermission(context)
+    val internet = androidx.compose.runtime.remember { vm.hasInternetPermission(context) }
     val status = AshTheme.status
 
     AshScaffold(title = stringResource(R.string.privacy_title), onBack = onBack) { padding ->

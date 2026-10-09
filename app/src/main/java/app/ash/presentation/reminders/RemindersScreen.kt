@@ -34,6 +34,7 @@ import app.ash.designsystem.AshTextField
 import app.ash.designsystem.DateField
 import app.ash.designsystem.EmptyState
 import app.ash.designsystem.GroupedSection
+import app.ash.designsystem.groupedItems
 import app.ash.designsystem.MessageBanner
 import app.ash.designsystem.PrimaryButton
 import app.ash.designsystem.Tone
@@ -75,22 +76,19 @@ fun RemindersScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
             if (!hasPostNotifications(context)) item { MessageBanner(stringResource(R.string.reminders_no_permission), Tone.SOON) }
             val items = list
             if (items != null && items.isEmpty()) item { EmptyState(Icons.Rounded.NotificationsNone, stringResource(R.string.empty_reminders_title), stringResource(R.string.empty_reminders_body)) }
-            if (!items.isNullOrEmpty()) item {
-                GroupedSection {
-                    items.forEachIndexed { i, r ->
-                        AshRow(
-                            title = r.title,
-                            subtitle = listOfNotNull(r.body, "${relativeDay(r.fireAt)} · ${AshFormat.dateTime(r.fireAt)}",
-                                if (r.state == ReminderState.FIRED) stringResource(R.string.reminder_fired) else null).joinToString("\n"),
-                            showDivider = i < items.lastIndex,
-                            onClick = { navigate(ReminderEditRoute(r.id)) },
-                            trailing = {
-                                IconButton(onClick = { vm.snooze(r) }) { Icon(Icons.Rounded.Snooze, stringResource(R.string.action_snooze_day)) }
-                                IconButton(onClick = { vm.done(r) }) { Icon(Icons.Rounded.Done, stringResource(R.string.action_done)) }
-                            },
-                        )
-                    }
-                }
+            groupedItems(items.orEmpty(), key = { it.id }) { r, last ->
+                val fired = stringResource(R.string.reminder_fired)
+                AshRow(
+                    title = r.title,
+                    subtitle = listOfNotNull(r.body, "${relativeDay(r.fireAt)} · ${AshFormat.dateTime(r.fireAt)}",
+                        fired.takeIf { r.state == ReminderState.FIRED }).joinToString("\n"),
+                    showDivider = !last,
+                    onClick = { navigate(ReminderEditRoute(r.id)) },
+                    trailing = {
+                        IconButton(onClick = { vm.snooze(r) }) { Icon(Icons.Rounded.Snooze, stringResource(R.string.action_snooze_day)) }
+                        IconButton(onClick = { vm.done(r) }) { Icon(Icons.Rounded.Done, stringResource(R.string.action_done)) }
+                    },
+                )
             }
         }
     }
@@ -98,13 +96,14 @@ fun RemindersScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
 
 @HiltViewModel
 class ReminderEditViewModel @Inject constructor(savedState: SavedStateHandle, private val repo: ReminderRepository) : ViewModel() {
-    private val id = savedState.toRoute<ReminderEditRoute>().id
+    private val route = savedState.toRoute<ReminderEditRoute>()
+    private val id = route.id
     val form = MutableStateFlow<Reminder?>(null)
 
     init {
         viewModelScope.launch {
             form.value = (if (id != 0L) repo.get(id) else null)
-                ?: Reminder(title = "", fireAt = System.currentTimeMillis() + 24L * 60 * 60 * 1000)
+                ?: Reminder(title = route.title, fireAt = System.currentTimeMillis() + 24L * 60 * 60 * 1000)
         }
     }
 

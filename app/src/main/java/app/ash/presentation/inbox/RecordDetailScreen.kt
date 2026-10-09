@@ -169,7 +169,7 @@ fun RecordDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                             Text(stringResource(R.string.action_reopen))
                         }
                     }
-                    OutlinedButton(onClick = { navigate(ReminderEditRoute()) }, modifier = Modifier.height(52.dp).fillMaxWidth()) {
+                    OutlinedButton(onClick = { navigate(ReminderEditRoute(title = record.title)) }, modifier = Modifier.height(52.dp).fillMaxWidth()) {
                         Text(stringResource(R.string.add_reminder))
                     }
                 }

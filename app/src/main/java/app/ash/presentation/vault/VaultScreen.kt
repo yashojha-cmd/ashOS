@@ -111,9 +111,19 @@ class VaultViewModel @Inject constructor(
         onResult(result)
     }
 
-    suspend fun thumbnail(id: Long): Bitmap? = repo.readThumbnail(id)?.let { bytes ->
-        withContext(Dispatchers.Default) { ImageTools.decodeSampled(bytes, 480) }
+    /** Decrypted thumbnails, kept in memory only (max ~16 MB) so scrolling never re-decrypts. */
+    private val thumbs = object : android.util.LruCache<Long, Bitmap>(16 * 1024 * 1024) {
+        override fun sizeOf(key: Long, value: Bitmap) = value.byteCount
     }
+
+    suspend fun thumbnail(id: Long): Bitmap? {
+        thumbs.get(id)?.let { return it }
+        val bitmap = repo.readThumbnail(id)?.let { bytes -> withContext(Dispatchers.Default) { ImageTools.decodeSampled(bytes, 480) } }
+        bitmap?.let { thumbs.put(id, it) }
+        return bitmap
+    }
+
+    override fun onCleared() = thumbs.evictAll()
 }
 
 @Composable

@@ -110,6 +110,12 @@ class BackupRepository @Inject constructor(
                             zip.putNextEntry(ZipEntry(DOCS_PREFIX + doc.fileName))
                             vault.openDecrypted(doc.fileName).use { it.copyTo(zip) }
                             zip.closeEntry()
+                            val thumb = VaultStorage.thumbName(doc.fileName)
+                            if (vault.exists(thumb)) {
+                                zip.putNextEntry(ZipEntry(DOCS_PREFIX + thumb))
+                                vault.openDecrypted(thumb).use { it.copyTo(zip) }
+                                zip.closeEntry()
+                            }
                         }
                     }
                 }
@@ -172,7 +178,10 @@ class BackupRepository @Inject constructor(
                 dao.insertReminders(data.reminders)
             }
             val keep = data.documents.map { it.fileName }.toSet()
-            (previousFiles - keep).forEach { vault.delete(it) }
+            (previousFiles - keep).forEach {
+                vault.delete(it)
+                vault.delete(VaultStorage.thumbName(it))
+            }
             scheduler.cancelAll()
             reminders.rescheduleAll()
             diagnostics.audit(AuditAction.IMPORT, "backup")

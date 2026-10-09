@@ -43,6 +43,7 @@ import app.ash.designsystem.AshScaffold
 import app.ash.designsystem.EmptyState
 import app.ash.designsystem.GroupedSection
 import app.ash.designsystem.SecureScreen
+import app.ash.designsystem.groupedItems
 import app.ash.designsystem.directionLabel
 import app.ash.designsystem.dueText
 import app.ash.designsystem.periodLabel
@@ -80,7 +81,7 @@ class MoneyViewModel @Inject constructor(
 
 /** Transactions, bills and subscriptions (§16, §17). Protected from screenshots. */
 @Composable
-fun MoneyScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
+private fun MoneyContent(onBack: () -> Unit, navigate: (Any) -> Unit) {
     SecureScreen()
     val vm: MoneyViewModel = hiltViewModel()
     val txns by vm.transactions.collectAsStateWithLifecycle()
@@ -120,42 +121,33 @@ fun MoneyScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                 0 -> {
                     val list = txns
                     if (list != null && list.isEmpty()) item { EmptyState(Icons.Rounded.SwapVert, stringResource(R.string.empty_txn_title), stringResource(R.string.empty_txn_body)) }
-                    if (!list.isNullOrEmpty()) item {
-                        GroupedSection {
-                            list.forEachIndexed { i, t ->
-                                val sign = when (t.direction) { TxnDirection.EXPENSE -> "−"; TxnDirection.INCOME, TxnDirection.REFUND -> "+"; else -> "" }
-                                AshRow(
-                                    title = t.merchant ?: t.sourceLabel ?: directionLabel(t.direction),
-                                    subtitle = buildString {
-                                        append(directionLabel(t.direction)); append(" · "); append(relativeDay(t.occurredAt))
-                                        t.accountRef?.let { append(" · "); append(it) }
-                                        if (t.userCorrected) { append(" · "); append(stringResource(R.string.txn_corrected)) }
-                                    },
-                                    icon = AshIcons.category(t.category),
-                                    showDivider = i < list.lastIndex,
-                                    onClick = { navigate(RecordRoute(t.recordId)) },
-                                    trailing = { Text(sign + Money.format(t.amountPaise), style = MaterialTheme.typography.titleSmall) },
-                                )
-                            }
-                        }
+                    groupedItems(list.orEmpty(), key = { "t${it.recordId}" }) { t, last ->
+                        val sign = when (t.direction) { TxnDirection.EXPENSE -> "−"; TxnDirection.INCOME, TxnDirection.REFUND -> "+"; else -> "" }
+                        val corrected = stringResource(R.string.txn_corrected)
+                        val dir = directionLabel(t.direction)
+                        val day = relativeDay(t.occurredAt)
+                        AshRow(
+                            title = t.merchant ?: t.sourceLabel ?: dir,
+                            subtitle = listOfNotNull(dir, day, t.accountRef, corrected.takeIf { t.userCorrected }).joinToString(" · "),
+                            icon = AshIcons.category(t.category),
+                            showDivider = !last,
+                            onClick = { navigate(RecordRoute(t.recordId)) },
+                            trailing = { Text(sign + Money.format(t.amountPaise), style = MaterialTheme.typography.titleSmall) },
+                        )
                     }
                 }
                 1 -> {
                     val list = bills
                     if (list != null && list.isEmpty()) item { EmptyState(Icons.Rounded.ReceiptLong, stringResource(R.string.empty_bills_title), stringResource(R.string.empty_bills_body)) }
-                    if (!list.isNullOrEmpty()) item {
-                        GroupedSection {
-                            list.forEachIndexed { i, b ->
-                                AshRow(
-                                    title = b.biller,
-                                    subtitle = listOfNotNull(b.amountPaise?.let { Money.format(it) }, if (b.paidAt != null) stringResource(R.string.bill_paid) else dueText(b.dueAt)).joinToString(" · "),
-                                    icon = AshIcons.category(app.ash.domain.model.Category.BILLS),
-                                    showDivider = i < list.lastIndex,
-                                    onClick = { navigate(RecordRoute(b.recordId)) },
-                                    trailing = { Checkbox(checked = b.paidAt != null, onCheckedChange = { vm.setPaid(b.recordId, it) }) },
-                                )
-                            }
-                        }
+                    groupedItems(list.orEmpty(), key = { "b${it.recordId}" }) { b, last ->
+                        AshRow(
+                            title = b.biller,
+                            subtitle = listOfNotNull(b.amountPaise?.let { Money.format(it) }, if (b.paidAt != null) stringResource(R.string.bill_paid) else dueText(b.dueAt)).joinToString(" · "),
+                            icon = AshIcons.category(app.ash.domain.model.Category.BILLS),
+                            showDivider = !last,
+                            onClick = { navigate(RecordRoute(b.recordId)) },
+                            trailing = { Checkbox(checked = b.paidAt != null, onCheckedChange = { vm.setPaid(b.recordId, it) }) },
+                        )
                     }
                 }
                 else -> {
@@ -169,24 +161,20 @@ fun MoneyScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                         }
                     }
                     if (list != null && list.isEmpty()) item { EmptyState(Icons.Rounded.Autorenew, stringResource(R.string.empty_subs_title), stringResource(R.string.empty_subs_body)) }
-                    if (!list.isNullOrEmpty()) item {
-                        GroupedSection {
-                            list.forEachIndexed { i, s ->
-                                AshRow(
-                                    title = s.name,
-                                    subtitle = listOfNotNull(
-                                        periodLabel(s.period),
-                                        s.nextRenewalAt?.let { stringResource(R.string.renews_on, relativeDay(it)) },
-                                        if (s.autoDetected) stringResource(R.string.sub_detected) else null,
-                                        if (!s.active) stringResource(R.string.sub_inactive) else null,
-                                    ).joinToString(" · "),
-                                    icon = AshIcons.category(app.ash.domain.model.Category.SUBSCRIPTIONS),
-                                    showDivider = i < list.lastIndex,
-                                    onClick = { navigate(SubscriptionEditRoute(s.id)) },
-                                    trailing = { Text(Money.format(s.amountPaise), style = MaterialTheme.typography.titleSmall) },
-                                )
-                            }
-                        }
+                    groupedItems(list.orEmpty(), key = { "s${it.id}" }) { s, last ->
+                        AshRow(
+                            title = s.name,
+                            subtitle = listOfNotNull(
+                                periodLabel(s.period),
+                                s.nextRenewalAt?.let { stringResource(R.string.renews_on, relativeDay(it)) },
+                                if (s.autoDetected) stringResource(R.string.sub_detected) else null,
+                                if (!s.active) stringResource(R.string.sub_inactive) else null,
+                            ).joinToString(" · "),
+                            icon = AshIcons.category(app.ash.domain.model.Category.SUBSCRIPTIONS),
+                            showDivider = !last,
+                            onClick = { navigate(SubscriptionEditRoute(s.id)) },
+                            trailing = { Text(Money.format(s.amountPaise), style = MaterialTheme.typography.titleSmall) },
+                        )
                     }
                 }
             }
@@ -201,5 +189,13 @@ private fun SummaryTile(label: String, value: String, modifier: Modifier) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, style = MaterialTheme.typography.titleLarge)
         }
+    }
+}
+
+/** Financial information is behind fingerprint or PIN (§20). */
+@Composable
+fun MoneyScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
+    app.ash.presentation.common.SensitiveGate(required = true, title = stringResource(R.string.money_title), onBack = onBack) {
+        MoneyContent(onBack, navigate)
     }
 }

@@ -76,6 +76,8 @@ interface LifeRepository {
     suspend fun deleteSubscription(id: Long)
     /** Scans transaction history for recurring payments; returns how many new subscriptions were found. */
     suspend fun detectSubscriptions(): Int
+    /** Moves passed renewal dates of active subscriptions forward by one period; returns how many moved. */
+    suspend fun rollRenewals(): Int
 }
 
 interface ProfileRepository {

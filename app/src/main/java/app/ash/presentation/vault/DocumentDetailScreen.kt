@@ -123,7 +123,7 @@ class DocumentDetailViewModel @Inject constructor(
     fun load(doc: Document) {
         if (form.value != null) return
         form.value = DocForm(doc.title, doc.docType, doc.documentNumber.orEmpty(), doc.issuedAt, doc.expiresAt, doc.notes.orEmpty(), doc.tags.joinToString(", "), doc.sensitive, doc.vehicleId, doc.profileId)
-        viewModelScope.launch { pages.value = render(doc) }
+        viewModelScope.launch { render(doc) }
     }
 
     /** Fields OCR suggested, shown so the user can see what ASH read. */
@@ -131,22 +131,25 @@ class DocumentDetailViewModel @Inject constructor(
         engine.extractDocumentFields(it, ParseContext(time.today(), time.zone(), time.nowMillis()))
     }
 
-    private suspend fun render(doc: Document): List<Bitmap> = withContext(Dispatchers.IO) {
+    /** Pages appear one by one as they render, so the first page shows without waiting for the rest. */
+    private suspend fun render(doc: Document) = withContext(Dispatchers.IO) {
         if (doc.mimeType == "application/pdf") {
-            when (val r = repo.decryptToTempFile(doc.id)) {
-                is AppResult.Success -> {
-                    tempPdf = r.value
+            val r = repo.decryptToTempFile(doc.id)
+            if (r is AppResult.Success) {
+                tempPdf = r.value
+                try {
                     val count = runCatching { ImageTools.pdfPageCount(r.value) }.getOrDefault(0).coerceAtMost(20)
-                    (0 until count).mapNotNull { runCatching { ImageTools.renderPdfPage(r.value, it, 1200) }.getOrNull() }
-                        .also { r.value.delete(); tempPdf = null }
+                    for (i in 0 until count) {
+                        runCatching { ImageTools.renderPdfPage(r.value, i, 1200) }.getOrNull()?.let { page -> pages.value = pages.value + page }
+                    }
+                } finally {
+                    r.value.delete()
+                    tempPdf = null
                 }
-                is AppResult.Failure -> emptyList()
             }
         } else {
-            when (val r = repo.readDecrypted(doc.id)) {
-                is AppResult.Success -> listOfNotNull(ImageTools.decodeSampled(r.value, 2000))
-                is AppResult.Failure -> emptyList()
-            }
+            val r = repo.readDecrypted(doc.id)
+            if (r is AppResult.Success) ImageTools.decodeSampled(r.value, 2000)?.let { pages.value = listOf(it) }
         }
     }
 
@@ -203,7 +206,7 @@ class DocumentDetailViewModel @Inject constructor(
 }
 
 @Composable
-fun DocumentDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
+private fun DocumentDetailContent(onBack: () -> Unit, navigate: (Any) -> Unit) {
     SecureScreen()
     val vm: DocumentDetailViewModel = hiltViewModel()
     val doc by vm.document.collectAsStateWithLifecycle()
@@ -337,4 +340,16 @@ private fun ZoomableImage(bitmap: Bitmap) {
             .transformable(state)
             .graphicsLayer { scaleX = scale; scaleY = scale },
     )
+}
+
+/** Sensitive documents ask for fingerprint or PIN even when opened from Home or Search. */
+@Composable
+fun DocumentDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
+    val vm: DocumentDetailViewModel = hiltViewModel()
+    val doc by vm.document.collectAsStateWithLifecycle()
+    app.ash.presentation.common.SensitiveGate(
+        required = doc?.sensitive ?: false, // nothing is shown until the document has loaded
+        title = doc?.title ?: stringResource(R.string.vault_title),
+        onBack = onBack,
+    ) { DocumentDetailContent(onBack, navigate) }
 }

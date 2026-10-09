@@ -26,6 +26,7 @@ import app.ash.logging.AshLogger
 import app.ash.reminder.ReminderPlanner
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -229,6 +230,28 @@ class LifeRepositoryImpl @Inject constructor(
         }
         if (added > 0) AshLogger.i(TAG, "Detected $added new recurring payments")
         return added
+    }
+
+    override suspend fun rollRenewals(): Int {
+        val today = time.now().toLocalDate()
+        var moved = 0
+        for (entity in subscriptions.observeAll().first()) {
+            val next = entity.nextRenewalAt ?: continue
+            if (!entity.active) continue
+            var date = app.ash.common.Dates.toLocalDate(next, time.zone())
+            if (!date.isBefore(today)) continue
+            while (date.isBefore(today)) {
+                date = when (entity.period) {
+                    app.ash.domain.model.RecurrencePeriod.WEEKLY -> date.plusWeeks(1)
+                    app.ash.domain.model.RecurrencePeriod.MONTHLY -> date.plusMonths(1)
+                    app.ash.domain.model.RecurrencePeriod.QUARTERLY -> date.plusMonths(3)
+                    app.ash.domain.model.RecurrencePeriod.YEARLY -> date.plusYears(1)
+                }
+            }
+            saveSubscription(entity.toDomain().copy(nextRenewalAt = app.ash.common.Dates.morningOf(date, time.zone())))
+            moved++
+        }
+        return moved
     }
 
     private fun normaliseReg(reg: String) = reg.uppercase().replace(" ", "").replace("-", "")
