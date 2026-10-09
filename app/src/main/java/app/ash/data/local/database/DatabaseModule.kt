@@ -2,15 +2,20 @@ package app.ash.data.local.database
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import app.ash.security.DatabaseKeyProvider
+import app.ash.workspace.Workspace
+import app.ash.workspace.WorkspaceManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
@@ -24,17 +29,44 @@ private class LazySqlCipherFactory(private val passphrase: () -> ByteArray) : Su
                 System.loadLibrary("sqlcipher")
                 SupportOpenHelperFactory(passphrase()).create(configuration)
             }
-            private var walEnabled: Boolean? = null
 
             override val databaseName: String? get() = configuration.name
-            override fun setWriteAheadLoggingEnabled(enabled: Boolean) {
-                walEnabled = enabled
-                delegate.setWriteAheadLoggingEnabled(enabled)
-            }
+            override fun setWriteAheadLoggingEnabled(enabled: Boolean) = delegate.setWriteAheadLoggingEnabled(enabled)
             override val writableDatabase: SupportSQLiteDatabase get() = delegate.writableDatabase
             override val readableDatabase: SupportSQLiteDatabase get() = delegate.readableDatabase
             override fun close() = delegate.close()
         }
+}
+
+/**
+ * One encrypted database per workspace, opened lazily and kept for the process lifetime.
+ * The UI uses the active workspace's database; background capture always uses REAL.
+ */
+@Singleton
+class WorkspaceDatabases @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val keys: DatabaseKeyProvider,
+) {
+    private val open = ConcurrentHashMap<Workspace, AshDatabase>()
+
+    fun get(workspace: Workspace): AshDatabase = open.getOrPut(workspace) { build(workspace) }
+
+    fun exists(workspace: Workspace): Boolean = open.containsKey(workspace) || context.getDatabasePath(workspace.dbName).exists()
+
+    private fun build(workspace: Workspace): AshDatabase =
+        Room.databaseBuilder(context, AshDatabase::class.java, workspace.dbName)
+            .openHelperFactory(LazySqlCipherFactory { keys.passphrase(workspace) })
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) = AshDatabase.seed(db, workspace.selfProfileName)
+
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    // Databases created before workspaces existed named the owner "Me".
+                    if (workspace == Workspace.REAL) {
+                        db.execSQL("UPDATE profiles SET name = ? WHERE relation = 'SELF' AND name = 'Me'", arrayOf<Any>(workspace.selfProfileName))
+                    }
+                }
+            })
+            .build()
 }
 
 @Module
@@ -42,12 +74,12 @@ private class LazySqlCipherFactory(private val passphrase: () -> ByteArray) : Su
 object DatabaseModule {
 
     @Provides
+    fun activeWorkspace(manager: WorkspaceManager): Workspace = manager.active
+
+    /** The database of the workspace this process is running (see WorkspaceManager). */
+    @Provides
     @Singleton
-    fun database(@ApplicationContext context: Context, keys: DatabaseKeyProvider): AshDatabase =
-        Room.databaseBuilder(context, AshDatabase::class.java, AshDatabase.NAME)
-            .openHelperFactory(LazySqlCipherFactory { keys.passphrase() })
-            .addCallback(AshDatabase.SeedCallback)
-            .build()
+    fun database(databases: WorkspaceDatabases, manager: WorkspaceManager): AshDatabase = databases.get(manager.active)
 
     @Provides fun recordDao(db: AshDatabase) = db.recordDao()
     @Provides fun notificationDao(db: AshDatabase) = db.notificationDao()

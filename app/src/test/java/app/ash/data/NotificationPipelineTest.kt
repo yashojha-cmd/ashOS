@@ -67,7 +67,7 @@ class NotificationPipelineTest {
     }
 
     private val settings = SettingsRepository(context)
-    private val reminders = ReminderRepositoryImpl(db.reminderDao(), ReminderScheduler(context), settings, time)
+    private val reminders = ReminderRepositoryImpl(db.reminderDao(), ReminderScheduler(context), settings, time, app.ash.workspace.Workspace.REAL)
     private val text = ReminderText(context)
     private val diagnostics = DiagnosticsRepository(db.diagnosticsDao(), db.auditDao(), db.statsDao(), time)
     private val life = LifeRepositoryImpl(
@@ -201,6 +201,46 @@ class NotificationPipelineTest {
         val titles = GetAttentionFeedUseCase(records, life, EmptyDocuments, time)().first().let { f -> (f.needsAttention + f.comingUp).map { it.title } }
         assertThat(titles).contains("New phone")
         assertThat(titles).doesNotContain("Old TV")
+
+        // 17. SMS history import: dated when received, past deadlines filed as handled, uncertain ones only logged.
+        settings.setStoreOriginalText(true)
+        val fortyDaysAgo = time.nowMillis() - 40L * 24 * 60 * 60 * 1000
+        val oldDue = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy").format(LocalDate.of(2026, 9, 5))
+        assertThat(
+            ingestor.ingest(sms, "sms-1", "TATAPW", "Tata Power: Bill of Rs 1,830.00 for CA 556677 is due on $oldDue.", fortyDaysAgo, historical = true),
+        ).isEqualTo(Result.CREATED)
+        val oldBill = db.recordDao().search("tata*").single()
+        assertThat(oldBill.status).isEqualTo(RecordStatus.HANDLED)
+        assertThat(oldBill.createdAt).isEqualTo(fortyDaysAgo)
+        assertThat(db.reminderDao().forTarget(app.ash.domain.model.ReminderTarget.RECORD, oldBill.id)).isEmpty()
+        assertThat(
+            ingestor.ingest(sms, "sms-2", "DLHVRY", "Your shipment AWB 9988776655 is out for delivery today by Delhivery.", fortyDaysAgo + 1000, historical = true),
+        ).isEqualTo(Result.LOW_CONFIDENCE)
+        assertThat(app.ash.notification.SmsHistoryImporter.isBusinessSender("VM-HDFCBK-S")).isTrue()
+        assertThat(app.ash.notification.SmsHistoryImporter.isBusinessSender("56767")).isTrue()
+        assertThat(app.ash.notification.SmsHistoryImporter.isBusinessSender("+919876543210")).isFalse()
+        assertThat(app.ash.notification.SmsHistoryImporter.isBusinessSender("9876543210")).isFalse()
+        assertThat(app.ash.notification.SmsHistoryImporter.senderLabel("VM-HDFCBK-S")).isEqualTo("HDFCBK")
+        assertThat(app.ash.notification.SmsHistoryImporter.senderLabel("AX-SBIINB")).isEqualTo("SBIINB")
+
+        // 18. Workspaces are isolated: the demo database never sees real data, and reminder work is namespaced.
+        val demoDb = Room.inMemoryDatabaseBuilder(context, AshDatabase::class.java).allowMainThreadQueries().addCallback(AshDatabase.SeedCallback).build()
+        val realGraph = app.ash.workspace.WorkspaceGraph(app.ash.workspace.Workspace.REAL, db, context, ReminderScheduler(context), settings, text, engine, time)
+        val demoGraph = app.ash.workspace.WorkspaceGraph(app.ash.workspace.Workspace.DEMO, demoDb, context, ReminderScheduler(context), settings, text, engine, time)
+        val realBefore = db.statsDao().records().first()
+        realGraph.sources.setEnabled(sms, true)
+        assertThat(realGraph.ingestor.ingest(sms, "ws-1", "Airtel", "Your Airtel broadband bill of Rs 1,178 is due on 25 Oct. Pay now.", time.nowMillis())).isEqualTo(Result.CREATED)
+        assertThat(db.statsDao().records().first()).isEqualTo(realBefore + 1)
+        assertThat(demoDb.statsDao().records().first()).isEqualTo(0)
+        val realReminder = realGraph.reminders.save(app.ash.domain.model.Reminder(title = "Real", fireAt = time.nowMillis() + 3_600_000))
+        val demoReminder = demoGraph.reminders.save(app.ash.domain.model.Reminder(title = "Demo", fireAt = time.nowMillis() + 3_600_000))
+        assertThat(demoReminder).isEqualTo(1L) // same numeric id space per database...
+        val wm = androidx.work.WorkManager.getInstance(context)
+        assertThat(wm.getWorkInfosForUniqueWork("reminder-yash-$realReminder").get()).isNotEmpty()
+        assertThat(wm.getWorkInfosForUniqueWork("reminder-demo-$demoReminder").get()).isNotEmpty() // ...but separate work
+        demoGraph.reminders.delete(demoReminder)
+        assertThat(wm.getWorkInfosForUniqueWork("reminder-yash-$realReminder").get().single().state).isEqualTo(androidx.work.WorkInfo.State.ENQUEUED)
+        demoDb.close()
     }
 
     private object EmptyDocuments : DocumentRepository {

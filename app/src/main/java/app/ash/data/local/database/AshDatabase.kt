@@ -91,7 +91,7 @@ abstract class AshDatabase : RoomDatabase() {
             }
         }
 
-        fun seed(db: SupportSQLiteDatabase) {
+        fun seed(db: SupportSQLiteDatabase, selfName: String = "Me") {
             Category.entries.forEachIndexed { index, category ->
                 db.execSQL(
                     "INSERT OR IGNORE INTO categories(`key`, builtIn, sortOrder, customLabel) VALUES (?, 1, ?, NULL)",
@@ -99,8 +99,8 @@ abstract class AshDatabase : RoomDatabase() {
                 )
             }
             db.execSQL(
-                "INSERT OR IGNORE INTO profiles(name, relation, createdAt) VALUES ('Me', 'SELF', ?)",
-                arrayOf<Any>(System.currentTimeMillis()),
+                "INSERT OR IGNORE INTO profiles(name, relation, createdAt) VALUES (?, 'SELF', ?)",
+                arrayOf<Any>(selfName, System.currentTimeMillis()),
             )
         }
     }

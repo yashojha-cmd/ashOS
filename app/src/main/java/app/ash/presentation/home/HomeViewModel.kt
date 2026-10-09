@@ -29,6 +29,7 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     feed: GetAttentionFeedUseCase,
     private val sources: SourceRepository,
+    val workspace: app.ash.workspace.Workspace,
 ) : ViewModel() {
 
     private val listener = MutableStateFlow(sources.isListenerEnabled())

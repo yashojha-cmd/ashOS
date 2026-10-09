@@ -83,12 +83,18 @@ class RecordRepositoryImpl @Inject constructor(
         sourcePackage: String,
         sourceLabel: String,
         originalText: String?,
+        postedAt: Long = time.nowMillis(),
+        historical: Boolean = false,
     ): Pair<Long, RecordStatus> {
         val now = time.nowMillis()
         val auto = signal.confidence >= ConfidencePolicy.AUTO
+        val deadline = signal.dueAt ?: signal.expiresAt ?: signal.eventAt
         val status = when {
             !auto -> RecordStatus.REVIEW
             signal.alreadyHandled -> RecordStatus.HANDLED
+            // Imported history: anything whose date has passed is already in the past for the user.
+            historical && signal.type != RecordType.INSURANCE && signal.type != RecordType.SUBSCRIPTION &&
+                (deadline == null || deadline < now - 24L * 60 * 60 * 1000) -> RecordStatus.HANDLED
             signal.actionRequired -> RecordStatus.ACTION_REQUIRED
             else -> RecordStatus.UNREAD
         }
@@ -109,8 +115,11 @@ class RecordRepositoryImpl @Inject constructor(
             expiresAt = signal.expiresAt, reference = signal.reference, importance = signal.importance, status = status,
             confidence = signal.confidence, source = RecordSource.NOTIFICATION, sourcePackage = sourcePackage,
             sourceLabel = sourceLabel, notificationId = notificationId, extras = extras,
+            // Dated when it actually arrived, so imported SMS sort into the right month.
+            createdAt = postedAt.coerceAtMost(now),
         )
-        val id = records.insert(record.toEntity(now))
+        // History keeps its original timestamp, so it never shows up as "recently handled" on Home.
+        val id = records.insert(record.toEntity(if (historical) record.createdAt else now))
         if (auto) materialize(record.copy(id = id))
         // Only a confident "bill paid" may close other bills; uncertain ones wait for the user.
         if (auto && signal.type == RecordType.BILL && signal.alreadyHandled) closeOpenBills(signal.title, now)

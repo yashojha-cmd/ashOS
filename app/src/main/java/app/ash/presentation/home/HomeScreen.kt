@@ -87,13 +87,15 @@ fun HomeScreen(navigate: (Any) -> Unit) {
     var addMenu by remember { mutableStateOf(false) }
     val feed = state.feed
 
-    val greeting = stringResource(
+    val timeGreeting = stringResource(
         when (state.greeting) {
             Greeting.MORNING -> R.string.greeting_morning
             Greeting.AFTERNOON -> R.string.greeting_afternoon
             Greeting.EVENING -> R.string.greeting_evening
         },
     )
+    // "Good afternoon, Yash" in the real account; the demo just says the time of day.
+    val greeting = if (vm.workspace == app.ash.workspace.Workspace.REAL) stringResource(R.string.greeting_with_name, timeGreeting, vm.workspace.selfProfileName) else timeGreeting
 
     AshScaffold(
         title = greeting,
@@ -124,7 +126,12 @@ fun HomeScreen(navigate: (Any) -> Unit) {
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
                 )
             }
-            if (!state.listenerEnabled) {
+            if (vm.workspace == app.ash.workspace.Workspace.DEMO) {
+                item { MessageBanner(stringResource(R.string.account_demo_banner), Tone.INFO) }
+            }
+            if (vm.workspace == app.ash.workspace.Workspace.DEMO) {
+                // Notification access belongs to the real account; no permission banners in the demo.
+            } else if (!state.listenerEnabled) {
                 item {
                     MessageBanner(stringResource(R.string.error_listener_disabled), Tone.SOON, actionLabel = stringResource(R.string.action_turn_on), onAction = { navigate(PermissionsRoute) })
                 }

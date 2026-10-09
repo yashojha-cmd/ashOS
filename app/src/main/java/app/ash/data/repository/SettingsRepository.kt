@@ -29,6 +29,7 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val secureAllScreens: Boolean = false,
     val lastMaintenanceAt: Long = 0,
+    val demoDataLoaded: Boolean = false,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ash_settings")
@@ -48,6 +49,7 @@ class SettingsRepository @Inject constructor(
         val theme = stringPreferencesKey("theme_mode")
         val secureAll = booleanPreferencesKey("secure_all_screens")
         val maintenance = longPreferencesKey("last_maintenance")
+        val demo = booleanPreferencesKey("demo_data_loaded")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -62,6 +64,7 @@ class SettingsRepository @Inject constructor(
             themeMode = p[Keys.theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
             secureAllScreens = p[Keys.secureAll] ?: false,
             lastMaintenanceAt = p[Keys.maintenance] ?: 0,
+            demoDataLoaded = p[Keys.demo] ?: false,
         )
     }
 
@@ -77,6 +80,7 @@ class SettingsRepository @Inject constructor(
     suspend fun setThemeMode(mode: ThemeMode) = context.dataStore.edit { it[Keys.theme] = mode.name }
     suspend fun setSecureAllScreens(enabled: Boolean) = context.dataStore.edit { it[Keys.secureAll] = enabled }
     suspend fun setLastMaintenance(at: Long) = context.dataStore.edit { it[Keys.maintenance] = at }
+    suspend fun setDemoDataLoaded(loaded: Boolean) = context.dataStore.edit { it[Keys.demo] = loaded }
 
     suspend fun clear() = context.dataStore.edit { it.clear() }
 }

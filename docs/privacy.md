@@ -21,10 +21,11 @@ Only what you allow, stored locally and encrypted:
 
 - **Notification access** (optional): lets ashOS read notifications from apps you choose.
 - **Notifications** (optional): lets ashOS show reminders.
+- **SMS** (optional): only if you tap "Import past SMS". ashOS reads bank, bill and travel SMS from business senders on this phone to fill in earlier months. Messages from personal numbers are skipped. Nothing is sent anywhere.
 - **Camera** (optional): used only when you scan a document.
 - **Biometric**: used for app lock and to open the Vault.
 
-ashOS does not request SMS, contacts, location or storage permissions.
+ashOS does not request contacts, location or storage permissions, and it can never send or receive SMS.
 
 ## Backups
 

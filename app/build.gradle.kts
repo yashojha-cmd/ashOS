@@ -22,6 +22,8 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Sample data tools exist in debug and staging builds only.
+        buildConfigField("boolean", "DEMO_DATA", "true")
     }
 
     buildTypes {
@@ -29,6 +31,7 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
+            buildConfigField("boolean", "DEMO_DATA", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -42,6 +45,7 @@ android {
             initWith(getByName("release"))
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
+            buildConfigField("boolean", "DEMO_DATA", "true")
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
         }
@@ -87,7 +91,6 @@ androidComponents {
                 val forbidden = listOf(
                     "android.permission.INTERNET",
                     "android.permission.ACCESS_NETWORK_STATE",
-                    "android.permission.READ_SMS",
                     "android.permission.QUERY_ALL_PACKAGES",
                 )
                 val found = forbidden.filter { perm ->

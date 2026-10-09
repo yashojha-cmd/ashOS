@@ -92,6 +92,7 @@ class BackupRepository @Inject constructor(
     private val logs: LogManager,
     private val diagnostics: DiagnosticsRepository,
     private val time: TimeProvider,
+    private val workspace: app.ash.workspace.Workspace,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -182,7 +183,7 @@ class BackupRepository @Inject constructor(
                 vault.delete(it)
                 vault.delete(VaultStorage.thumbName(it))
             }
-            scheduler.cancelAll()
+            scheduler.cancelAll(workspace)
             reminders.rescheduleAll()
             diagnostics.audit(AuditAction.IMPORT, "backup")
             AshLogger.i(TAG, "Imported ${data.records.size} records, ${data.documents.size} documents")
@@ -201,14 +202,16 @@ class BackupRepository @Inject constructor(
 
     /** Permanently removes everything ASH stored on this device. */
     suspend fun deleteAll() = withContext(io) {
-        scheduler.cancelAll()
-        androidx.work.WorkManager.getInstance(context).cancelAllWork()
-        NotificationManagerCompat.from(context).cancelAll()
+        scheduler.cancelAll(workspace)
+        if (workspace == app.ash.workspace.Workspace.REAL) NotificationManagerCompat.from(context).cancelAll()
         db.withTransaction { wipeTables() }
-        AshDatabase.seed(db.openHelper.writableDatabase)
+        AshDatabase.seed(db.openHelper.writableDatabase, workspace.selfProfileName)
         vault.deleteAll()
-        logs.clear()
-        settings.clear()
+        // Settings and logs are shared by both accounts; only deleting the real account resets them.
+        if (workspace == app.ash.workspace.Workspace.REAL) {
+            logs.clear()
+            settings.clear()
+        }
         AshLogger.i(TAG, "All local data deleted by the user")
     }
 

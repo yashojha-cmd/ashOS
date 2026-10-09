@@ -8,37 +8,25 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.ash.common.TimeProvider
-import app.ash.data.local.dao.AuditDao
-import app.ash.data.local.dao.NotificationDao
-import app.ash.data.local.dao.PolicyDao
-import app.ash.data.local.dao.RecordDao
-import app.ash.data.local.dao.SubscriptionDao
-import app.ash.data.local.dao.VehicleDao
-import app.ash.data.local.dao.WarrantyDao
 import app.ash.data.repository.SettingsRepository
-import app.ash.domain.repository.LifeRepository
 import app.ash.logging.AshLogger
+import app.ash.workspace.Workspace
+import app.ash.workspace.WorkspaceGraphs
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
 
 /**
- * Once a day, while idle and charging-agnostic: purge soft-deleted rows older than 30 days,
- * drop unmatched notification logs after 90 days, detect recurring payments, and switch off
- * detailed parser logging once it expires. No network constraint is ever used.
+ * Once a day, while the battery is not low: purge soft-deleted rows older than 30 days, drop
+ * unmatched notification logs after 90 days, detect recurring payments, roll renewals forward,
+ * and switch off detailed parser logging once it expires. Runs for every workspace that exists.
+ * No network constraint is ever used.
  */
 @HiltWorker
 class MaintenanceWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val records: RecordDao,
-    private val subscriptions: SubscriptionDao,
-    private val vehicles: VehicleDao,
-    private val policies: PolicyDao,
-    private val warranties: WarrantyDao,
-    private val notifications: NotificationDao,
-    private val audit: AuditDao,
-    private val life: LifeRepository,
+    private val graphs: WorkspaceGraphs,
     private val settings: SettingsRepository,
     private val time: TimeProvider,
 ) : CoroutineWorker(context, params) {
@@ -46,19 +34,24 @@ class MaintenanceWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = try {
         val now = time.nowMillis()
         val purgeBefore = now - 30 * DAY
-        val purged = records.purgeDeleted(purgeBefore) + subscriptions.purgeDeleted(purgeBefore) +
-            vehicles.purgeDeleted(purgeBefore) + policies.purgeDeleted(purgeBefore) + warranties.purgeDeleted(purgeBefore)
-        val dropped = notifications.deleteUnlinkedBefore(now - 90 * DAY)
-        audit.deleteBefore(now - 365 * DAY)
-        val detected = life.detectSubscriptions()
-        val rolled = life.rollRenewals()
+        for (workspace in Workspace.entries) {
+            if (!graphs.exists(workspace)) continue
+            val graph = graphs.get(workspace)
+            val db = graph.db
+            val purged = db.recordDao().purgeDeleted(purgeBefore) + db.subscriptionDao().purgeDeleted(purgeBefore) +
+                db.vehicleDao().purgeDeleted(purgeBefore) + db.policyDao().purgeDeleted(purgeBefore) + db.warrantyDao().purgeDeleted(purgeBefore)
+            val dropped = db.notificationDao().deleteUnlinkedBefore(now - 90 * DAY)
+            db.auditDao().deleteBefore(now - 365 * DAY)
+            val detected = graph.life.detectSubscriptions()
+            val rolled = graph.life.rollRenewals()
+            AshLogger.i(TAG, "Maintenance ${workspace.id}: purged=$purged droppedNotifications=$dropped subscriptionsDetected=$detected renewalsRolled=$rolled")
+        }
         val s = settings.current()
         if (s.detailedLogsUntil in 1 until now) {
             settings.setDetailedLogsUntil(0)
             AshLogger.detailedParserLogging = false
         }
         settings.setLastMaintenance(now)
-        AshLogger.i(TAG, "Maintenance: purged=$purged droppedNotifications=$dropped subscriptionsDetected=$detected renewalsRolled=$rolled")
         Result.success()
     } catch (e: Exception) {
         AshLogger.e(TAG, "Maintenance failed", e)

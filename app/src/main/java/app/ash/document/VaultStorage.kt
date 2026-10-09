@@ -20,12 +20,14 @@ import javax.inject.Singleton
 class VaultStorage @Inject constructor(
     @ApplicationContext private val context: Context,
     private val crypto: VaultCrypto,
+    /** Each workspace keeps its documents in its own folder. */
+    private val workspace: app.ash.workspace.Workspace,
 ) {
     data class Stored(val fileName: String, val sizeBytes: Long, val sha256: String)
 
     class TooLarge : Exception("File exceeds vault size limit")
 
-    private val vaultDir: File get() = File(context.filesDir, "vault").apply { mkdirs() }
+    private val vaultDir: File get() = File(context.filesDir, workspace.vaultDir).apply { mkdirs() }
     private val viewDir: File get() = File(context.noBackupFilesDir, "view").apply { mkdirs() }
 
     fun newFileName(): String = "${UUID.randomUUID()}.bin"

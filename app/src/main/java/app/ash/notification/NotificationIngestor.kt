@@ -39,7 +39,18 @@ class NotificationIngestor @Inject constructor(
     // Serialise ingestion so duplicate checks and merges never race.
     private val mutex = Mutex()
 
-    suspend fun ingest(packageName: String, notificationKey: String?, title: String, text: String, postedAt: Long): Result = mutex.withLock {
+    /**
+     * @param historical true for SMS history import: past deadlines are filed as handled, and uncertain
+     *   finds are only logged (an old backlog should not flood the review queue).
+     */
+    suspend fun ingest(
+        packageName: String,
+        notificationKey: String?,
+        title: String,
+        text: String,
+        postedAt: Long,
+        historical: Boolean = false,
+    ): Result = mutex.withLock {
         try {
             val source = sources.recordSeen(packageName)
             if (!source.enabled) return Result.SOURCE_DISABLED
@@ -56,7 +67,8 @@ class NotificationIngestor @Inject constructor(
                 return Result.SENSITIVE
             }
 
-            val hash = raw.fullText.hashCode()
+            // Body text only, so an SMS seen live (titled with the contact name) and imported later matches.
+            val hash = raw.text.ifBlank { raw.fullText }.hashCode()
             if (notifications.countSimilar(packageName, hash, postedAt - DUPLICATE_WINDOW_MS) > 0) {
                 diagnostics.increment(Counters.NOTIFICATIONS_DUPLICATE)
                 return Result.DUPLICATE
@@ -87,6 +99,7 @@ class NotificationIngestor @Inject constructor(
             AshLogger.sensitive(TAG, "Parsed $packageName -> ${signal?.parserId}:${signal?.confidence} | ${raw.fullText}")
 
             if (signal == null || notificationOutcome == NotificationOutcome.LOW_CONFIDENCE) return Result.LOW_CONFIDENCE
+            if (historical && notificationOutcome == NotificationOutcome.REVIEW) return Result.LOW_CONFIDENCE
 
             val (recordId, _) = records.createFromSignal(
                 signal = signal,
@@ -94,6 +107,8 @@ class NotificationIngestor @Inject constructor(
                 sourcePackage = packageName,
                 sourceLabel = source.label,
                 originalText = if (storeText) raw.fullText else null,
+                postedAt = postedAt,
+                historical = historical,
             )
             notifications.linkRecord(notificationId, recordId)
             return if (notificationOutcome == NotificationOutcome.REVIEW) {

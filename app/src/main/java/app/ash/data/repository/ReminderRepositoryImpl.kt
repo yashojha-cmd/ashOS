@@ -24,6 +24,8 @@ class ReminderRepositoryImpl @Inject constructor(
     private val scheduler: ReminderScheduler,
     private val settings: SettingsRepository,
     private val time: TimeProvider,
+    /** Which workspace this repository belongs to; reminders are scheduled under it. */
+    private val workspace: app.ash.workspace.Workspace,
 ) : ReminderRepository {
 
     override fun observeUpcoming(limit: Int): Flow<List<Reminder>> = dao.observeUpcoming(limit).map { list -> list.map { it.toDomain() } }
@@ -40,31 +42,31 @@ class ReminderRepositoryImpl @Inject constructor(
             state = ReminderState.SCHEDULED, auto = reminder.auto, createdAt = now, updatedAt = now,
         )
         val id = if (reminder.id == 0L) dao.insert(entity) else entity.id.also { dao.update(entity) }
-        scheduler.schedule(id, reminder.fireAt, settings.current().exactReminders)
+        scheduler.schedule(workspace, id, reminder.fireAt, settings.current().exactReminders)
         return id
     }
 
     override suspend fun delete(id: Long) {
-        scheduler.cancel(id)
+        scheduler.cancel(workspace, id)
         dao.delete(id)
     }
 
     override suspend fun markDone(id: Long) {
-        scheduler.cancel(id)
+        scheduler.cancel(workspace, id)
         dao.updateState(id, ReminderState.DONE, time.nowMillis())
     }
 
     override suspend fun snooze(id: Long, untilMillis: Long) {
         val existing = dao.getById(id) ?: return
         dao.update(existing.copy(fireAt = untilMillis, state = ReminderState.SNOOZED, updatedAt = time.nowMillis()))
-        scheduler.schedule(id, untilMillis, settings.current().exactReminders)
+        scheduler.schedule(workspace, id, untilMillis, settings.current().exactReminders)
     }
 
     override suspend fun rescheduleAll() {
         val exact = settings.current().exactReminders
         val now = time.nowMillis()
         // Includes reminders that came due while the phone was off: they fire a few seconds from now.
-        for (reminder in dao.pendingAll()) scheduler.schedule(reminder.id, maxOf(reminder.fireAt, now + 5_000), exact)
+        for (reminder in dao.pendingAll()) scheduler.schedule(workspace, reminder.id, maxOf(reminder.fireAt, now + 5_000), exact)
     }
 
     /** Replaces pending automatic reminders for a target with a fresh plan. Idempotent. */
@@ -78,7 +80,7 @@ class ReminderRepositoryImpl @Inject constructor(
     ) {
         for (existing in dao.forTarget(target, targetId)) {
             if (existing.auto && (existing.state == ReminderState.SCHEDULED || existing.state == ReminderState.SNOOZED)) {
-                scheduler.cancel(existing.id)
+                scheduler.cancel(workspace, existing.id)
             }
         }
         dao.deletePendingAuto(target, targetId)
@@ -93,13 +95,13 @@ class ReminderRepositoryImpl @Inject constructor(
                     createdAt = now, updatedAt = now,
                 ),
             )
-            scheduler.schedule(id, planned.fireAt, exact)
+            scheduler.schedule(workspace, id, planned.fireAt, exact)
         }
     }
 
     suspend fun cancelForTarget(target: ReminderTarget, targetId: Long) {
         for (existing in dao.forTarget(target, targetId)) {
-            scheduler.cancel(existing.id)
+            scheduler.cancel(workspace, existing.id)
             dao.delete(existing.id)
         }
     }

@@ -19,7 +19,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AshNotificationListener : NotificationListenerService() {
 
-    @Inject lateinit var ingestor: NotificationIngestor
+    @Inject lateinit var graphs: app.ash.workspace.WorkspaceGraphs
 
     @Inject @ApplicationScope lateinit var scope: CoroutineScope
 
@@ -64,7 +64,8 @@ class AshNotificationListener : NotificationListenerService() {
         }
         val posted = sbn.postTime
         val key = sbn.key
-        scope.launch { ingestor.ingest(sbn.packageName, key, title, text, posted) }
+        // Real notifications always go to the real account, even while the demo account is open.
+        scope.launch { graphs.real.ingestor.ingest(sbn.packageName, key, title, text, posted) }
     }
 
     companion object {

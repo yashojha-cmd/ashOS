@@ -99,18 +99,19 @@ class DatabaseKeyProvider @Inject constructor(
     @ApplicationContext private val context: Context,
     private val keyManager: KeyManager,
 ) {
-    private val keyFile: File get() = File(context.noBackupFilesDir, "keys/db.key")
+    private fun keyFile(workspace: app.ash.workspace.Workspace) = File(context.noBackupFilesDir, "keys/${workspace.keyFile}")
 
+    /** Each workspace has its own random passphrase, so the two databases are independently encrypted. */
     @Synchronized
-    fun passphrase(): ByteArray {
-        val file = keyFile
+    fun passphrase(workspace: app.ash.workspace.Workspace): ByteArray {
+        val file = keyFile(workspace)
         if (file.exists()) {
             try {
                 return keyManager.unwrap(file.readBytes())
             } catch (e: Exception) {
                 // The Keystore key is gone (e.g. device credential reset). The old database is unreadable.
-                AshLogger.e(TAG, "Database key could not be unwrapped; starting a fresh encrypted database", e)
-                context.deleteDatabase(app.ash.data.local.database.AshDatabase.NAME)
+                AshLogger.e(TAG, "Database key for ${workspace.id} could not be unwrapped; starting a fresh encrypted database", e)
+                context.deleteDatabase(workspace.dbName)
             }
         }
         val fresh = ByteArray(32).also { SecureRandom().nextBytes(it) }
@@ -119,8 +120,8 @@ class DatabaseKeyProvider @Inject constructor(
         return fresh
     }
 
-    fun destroy() {
-        keyFile.delete()
+    fun destroy(workspace: app.ash.workspace.Workspace) {
+        keyFile(workspace).delete()
     }
 
     private companion object {

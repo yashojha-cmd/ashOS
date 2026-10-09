@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Optional; only used when the user turns on exact reminders. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Optional; asked only when the user taps "Import past SMS". Read on-device only. -->
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 

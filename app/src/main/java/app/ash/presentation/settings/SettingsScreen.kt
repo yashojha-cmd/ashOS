@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Alarm
@@ -67,8 +68,46 @@ class SettingsViewModel @Inject constructor(
     private val reminders: ReminderRepository,
     val scheduler: ReminderScheduler,
     private val lock: AppLockManager,
+    private val demo: app.ash.demo.DemoDataSeeder,
+    private val workspaces: app.ash.workspace.WorkspaceManager,
+    private val backup: app.ash.backup.BackupRepository,
+    private val sms: app.ash.notification.SmsHistoryImporter,
 ) : ViewModel() {
     val settings = repo.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
+
+    val workspace: app.ash.workspace.Workspace get() = workspaces.active
+    val supportsDemo: Boolean get() = workspaces.supportsDemo
+
+    /** Null when idle; otherwise the step being loaded. */
+    val demoProgress = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+    /** Null when idle; otherwise (done, total) messages read. */
+    val smsProgress = kotlinx.coroutines.flow.MutableStateFlow<Pair<Int, Int>?>(null)
+
+    fun switchAccount() = workspaces.signOut()
+
+    /** Demo account only: wipe it and fill it again with fresh sample data. */
+    fun resetDemo(done: (app.ash.demo.DemoDataSeeder.Summary?) -> Unit) = viewModelScope.launch {
+        if (workspaces.active != app.ash.workspace.Workspace.DEMO) return@launch
+        demoProgress.value = "…"
+        val summary = runCatching {
+            backup.deleteAll()
+            demo.seed { step -> demoProgress.value = step }
+        }.onFailure { app.ash.logging.AshLogger.e("Demo", "Reset demo data failed", it) }.getOrNull()
+        demoProgress.value = null
+        done(summary)
+    }
+
+    fun hasSmsPermission() = sms.hasPermission()
+
+    fun importSms(done: (app.ash.notification.SmsHistoryImporter.Result?) -> Unit) = viewModelScope.launch {
+        smsProgress.value = 0 to 0
+        val result = runCatching { sms.import { d, t -> smsProgress.value = d to t } }
+            .onFailure { app.ash.logging.AshLogger.e("SmsImport", "SMS import failed", it) }
+            .getOrNull()
+        smsProgress.value = null
+        done(result)
+    }
 
     fun setAppLock(enabled: Boolean) = viewModelScope.launch {
         repo.setAppLock(enabled)
@@ -100,6 +139,61 @@ fun SettingsScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
 
     AshScaffold(title = stringResource(R.string.settings_title), onBack = onBack, snackbarHost = snackbar) { padding ->
         LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp)) {
+            item {
+                val progress by vm.demoProgress.collectAsStateWithLifecycle()
+                val smsProgress by vm.smsProgress.collectAsStateWithLifecycle()
+                val doneTemplate = stringResource(R.string.demo_done)
+                val smsDoneTemplate = stringResource(R.string.sms_import_done)
+                val smsDenied = stringResource(R.string.sms_permission_denied)
+                val failText = stringResource(R.string.error_unknown)
+                val smsLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                    androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+                ) { granted ->
+                    if (!granted) scope.launch { snackbar.showSnackbar(smsDenied) }
+                    else vm.importSms { r -> scope.launch { snackbar.showSnackbar(r?.let { String.format(smsDoneTemplate, it.businessMessages, it.created, it.skippedPersonal) } ?: failText) } }
+                }
+                val accountName = if (vm.workspace == app.ash.workspace.Workspace.REAL) stringResource(R.string.account_real_title) else stringResource(R.string.account_demo_title)
+                GroupedSection(header = stringResource(R.string.account_header)) {
+                    AshRow(
+                        title = stringResource(R.string.account_signed_in, accountName),
+                        icon = Icons.Rounded.Group,
+                        showDivider = true,
+                    )
+                    if (vm.supportsDemo) {
+                        AshRow(stringResource(R.string.account_switch), icon = Icons.Rounded.Apps, showChevron = true, onClick = vm::switchAccount)
+                    }
+                    if (vm.workspace == app.ash.workspace.Workspace.DEMO) {
+                        AshRow(
+                            title = stringResource(R.string.demo_reset),
+                            subtitle = progress?.let { stringResource(R.string.demo_loading, it) } ?: stringResource(R.string.demo_reset_desc),
+                            icon = Icons.Rounded.BugReport,
+                            showDivider = false,
+                            onClick = if (progress == null) ({
+                                vm.resetDemo { summary ->
+                                    scope.launch { snackbar.showSnackbar(summary?.let { String.format(doneTemplate, it.created, it.review, it.documents) } ?: failText) }
+                                }
+                            }) else null,
+                            trailing = { if (progress != null) androidx.compose.material3.CircularProgressIndicator(modifier = androidx.compose.ui.Modifier.size(22.dp), strokeWidth = 2.dp) },
+                        )
+                    } else {
+                        AshRow(
+                            title = stringResource(R.string.sms_import),
+                            subtitle = smsProgress?.let { (done, total) -> stringResource(R.string.sms_importing, done, total) }
+                                ?: stringResource(R.string.sms_import_desc, app.ash.notification.SmsHistoryImporter.DEFAULT_DAYS),
+                            icon = Icons.Rounded.MarkunreadMailbox,
+                            showDivider = false,
+                            onClick = if (smsProgress == null) ({
+                                if (vm.hasSmsPermission()) {
+                                    vm.importSms { r -> scope.launch { snackbar.showSnackbar(r?.let { String.format(smsDoneTemplate, it.businessMessages, it.created, it.skippedPersonal) } ?: failText) } }
+                                } else {
+                                    smsLauncher.launch(android.Manifest.permission.READ_SMS)
+                                }
+                            }) else null,
+                            trailing = { if (smsProgress != null) androidx.compose.material3.CircularProgressIndicator(modifier = androidx.compose.ui.Modifier.size(22.dp), strokeWidth = 2.dp) },
+                        )
+                    }
+                }
+            }
             item {
                 GroupedSection(header = stringResource(R.string.settings_privacy)) {
                     AshRow(stringResource(R.string.privacy_title), subtitle = stringResource(R.string.privacy_promise_short), icon = Icons.Rounded.PrivacyTip, showChevron = true, onClick = { navigate(PrivacyRoute) })

@@ -1,5 +1,6 @@
 package app.ash.navigation
 
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -76,15 +77,35 @@ fun AshRoot(openReminders: MutableStateFlow<Boolean>) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             if (!state.loaded) return@Box
             if (state.secureAll) SecureScreen(alwaysSecure = true)
-            val nav = rememberNavController()
-            val pendingReminders by openReminders.collectAsStateWithLifecycle()
-            LaunchedEffect(pendingReminders, state.onboardingDone) {
-                if (pendingReminders && state.onboardingDone) {
-                    nav.navigate(RemindersRoute)
-                    openReminders.value = false
+            val activity = androidx.compose.ui.platform.LocalContext.current as android.app.Activity
+            androidx.compose.animation.AnimatedContent(
+                targetState = when {
+                    !state.signedIn -> RootStage.PICK_ACCOUNT
+                    state.preparingDemo -> RootStage.PREPARING
+                    else -> RootStage.APP
+                },
+                transitionSpec = {
+                    androidx.compose.animation.fadeIn(app.ash.designsystem.AshMotion.fadeSpring) togetherWith
+                        androidx.compose.animation.fadeOut(app.ash.designsystem.AshMotion.fadeSpring)
+                },
+                label = "root",
+            ) { stage ->
+                when (stage) {
+                    RootStage.PICK_ACCOUNT -> app.ash.presentation.account.AccountPickerScreen(lastUsed = state.workspace) { ws -> vm.signIn(ws, activity) }
+                    RootStage.PREPARING -> app.ash.presentation.account.PreparingDemoScreen(state.demoStep)
+                    RootStage.APP -> {
+                        val nav = rememberNavController()
+                        val pendingReminders by openReminders.collectAsStateWithLifecycle()
+                        LaunchedEffect(pendingReminders, state.onboardingDone) {
+                            if (pendingReminders && state.onboardingDone) {
+                                nav.navigate(RemindersRoute)
+                                openReminders.value = false
+                            }
+                        }
+                        AshNavHost(nav, startOnboarding = !state.onboardingDone, reviewCount = state.reviewCount)
+                    }
                 }
             }
-            AshNavHost(nav, startOnboarding = !state.onboardingDone, reviewCount = state.reviewCount)
             if (state.locked) {
                 LockScreen(onUnlocked = vm::unlocked, onUnavailable = vm::disableLockBecauseUnavailable)
             }
@@ -211,3 +232,5 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
         }
     }
 }
+
+private enum class RootStage { PICK_ACCOUNT, PREPARING, APP }

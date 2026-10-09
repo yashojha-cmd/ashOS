@@ -483,6 +483,33 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="account_title">Welcome to ashOS</string>
+    <string name="account_subtitle">Choose an account to open.</string>
+    <string name="account_real_title">Yash</string>
+    <string name="account_real_body">Your real data. Notifications and SMS from this phone are saved here.</string>
+    <string name="account_demo_title">Demo</string>
+    <string name="account_demo_body">Sample bills, payments, trips, insurance and documents to explore every feature. Nothing real.</string>
+    <string name="account_last_used">LAST USED</string>
+    <string name="account_footer">Each account has its own encrypted database on this phone. Real notifications always go to Yash, even while the demo is open.</string>
+    <string name="account_preparing">Preparing the demo account…</string>
+    <string name="account_header">Account</string>
+    <string name="account_signed_in">Signed in as %1$s</string>
+    <string name="account_switch">Switch account</string>
+    <string name="account_demo_banner">You are in the demo account. Nothing here is real, and real notifications are not shown.</string>
+    <string name="demo_reset">Reset demo data</string>
+    <string name="demo_reset_desc">Deletes the demo data and creates fresh sample data.</string>
+    <string name="sms_import">Import past SMS</string>
+    <string name="sms_import_desc">Reads bank, bill and travel SMS from the last %1$d days to fill in earlier months. Messages from personal numbers are skipped. Everything stays on this phone.</string>
+    <string name="sms_importing">Reading SMS: %1$d of %2$d</string>
+    <string name="sms_import_done">Read %1$d business SMS and added %2$d items. %3$d personal messages were skipped.</string>
+    <string name="sms_permission_denied">SMS access was not allowed, so nothing was imported.</string>
+    <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="demo_header">Testing (not in release builds)</string>
+    <string name="demo_load">Load sample data</string>
+    <string name="demo_load_desc">Adds realistic bills, payments, trips, insurance, vehicles and documents so you can try every flow. Sample notifications go through the real parser.</string>
+    <string name="demo_loading">Loading sample data: %1$s…</string>
+    <string name="demo_loaded">Sample data already loaded. Use Delete all data to start over.</string>
+    <string name="demo_done">Added %1$d items, %2$d to review, %3$d documents</string>
     <string name="settings_privacy">Privacy</string>
     <string name="settings_store_text">Keep original notification text</string>
     <string name="settings_store_text_desc">Stored encrypted so you can see exactly what ashOS read. Turn off to keep only extracted details.</string>

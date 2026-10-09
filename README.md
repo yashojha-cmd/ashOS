@@ -10,19 +10,33 @@ ashOS has **no internet permission**. There is no cloud, no account, no analytic
 
 V1 implements phases 1–11 of the plan: foundation, Home dashboard, encrypted database, notification intelligence, bills and transactions, document vault with OCR, reminders, vehicles and insurance, search, security hardening, and tests. Phase 12 (Play Store) needs your signing key and store assets (see below).
 
+## Accounts (workspaces)
+
+On every start, ashOS asks which account to open:
+
+- **Yash**: your real data. Live notifications and imported SMS always go here, even while the demo is open.
+- **Demo**: sample bills, payments, trips, insurance, vehicles and documents. On first open it fills itself through the real parser and OCR. Settings → Reset demo data starts it over.
+
+Each account is a separate data space with its own SQLCipher database, its own database key and its own vault folder. The app runs one account per process, and switching restarts the app, so no screen can ever mix the two. Background work (notification capture, SMS import, reminder delivery, daily maintenance) uses an explicit per-account graph (`workspace/WorkspaceGraphs`), and reminder jobs are namespaced per account. Release builds (`DEMO_DATA = false`) skip the picker and run only the real account.
+
+## Past data from SMS
+
+Android keeps no notification history for apps, so earlier notifications cannot be recovered. Android does keep SMS: Settings → Account → **Import past SMS** asks for `READ_SMS` and reads the last 90 days of the inbox. Only business senders (DLT headers like `VM-HDFCBK`, or short codes) are read; messages from personal numbers are skipped without being parsed. Imported items keep their original dates, past deadlines are filed as handled, and uncertain matches are only logged. On Google Play, `READ_SMS` requires a permissions declaration (the "SMS-based money management" use case).
+
 ## Where your data lives
 
 Everything is in the app's private storage on the phone. Android blocks other apps from reading it, and cloud backup is disabled.
 
 | What | Path on the phone | Protection |
 |---|---|---|
-| Database | `/data/data/app.ash.android/databases/ash.db` | SQLCipher AES-256 |
-| Database key | `/data/data/app.ash.android/no_backup/keys/db.key` | Wrapped by Android Keystore (TEE, or StrongBox when available) |
-| Documents | `/data/data/app.ash.android/files/vault/*.bin` | Tink AES-256-GCM-HKDF streaming encryption, keyset wrapped by Keystore |
+| Database (Yash) | `/data/data/app.ash.android/databases/ash.db` | SQLCipher AES-256 |
+| Database (Demo) | `/data/data/app.ash.android/databases/ash-demo.db` | SQLCipher AES-256, separate key |
+| Database keys | `/data/data/app.ash.android/no_backup/keys/db.key`, `db-demo.key` | Wrapped by Android Keystore (TEE, or StrongBox when available) |
+| Documents | `/data/data/app.ash.android/files/vault/` (Yash), `files/vault-demo/` (Demo) | Tink AES-256-GCM-HKDF streaming encryption, keyset wrapped by Keystore |
 | Logs | `/data/data/app.ash.android/files/logs/` | Personal data redacted before writing |
 | Settings | `/data/data/app.ash.android/files/datastore/` | App-private |
 
-Debug builds use the package `app.ash.android.debug`. Copying the database file off the phone gives unreadable data, because the key never leaves the Keystore. Android Studio's Database Inspector cannot open the database either, since it is SQLCipher-encrypted.
+Debug builds use the package `app.ash.android.debug` and staging builds `app.ash.android.staging`; each has its own data. Copying the database file off the phone gives unreadable data, because the key never leaves the Keystore. Android Studio's Database Inspector cannot open the database either, since it is SQLCipher-encrypted.
 
 ## Build
 
@@ -40,7 +54,7 @@ Install on a connected Pixel 7 with USB debugging on:
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Every build runs `verify<Variant>NoInternetPermission`, which fails the build if any library merges `INTERNET`, `ACCESS_NETWORK_STATE`, `READ_SMS` or `QUERY_ALL_PACKAGES` into the manifest.
+Every build runs `verify<Variant>NoInternetPermission`, which fails the build if any library merges `INTERNET`, `ACCESS_NETWORK_STATE` or `QUERY_ALL_PACKAGES` into the manifest.
 
 ## Architecture
 
@@ -103,7 +117,7 @@ Settings → Diagnostics → View logs, then Share to export a ZIP. Logs mask am
 ## Known limitations
 
 - The notification listener only sees notifications posted after access is granted; there is no history import.
-- Many banks send SMS only. ashOS reads those through the Messages app notification, so Messages must be enabled as a source. ashOS never requests `READ_SMS`.
+- Many banks send SMS only. Live SMS arrive through the Messages app notification (enable Messages as a source); older SMS can be imported with the optional `READ_SMS` permission.
 - Parsers are deterministic rules. New notification formats need a dictionary or regex update, plus a golden test case.
 - Camera scanning captures a photo without automatic edge detection or perspective correction (planned).
 - OCR quality depends on the image. Users always confirm the extracted fields.
