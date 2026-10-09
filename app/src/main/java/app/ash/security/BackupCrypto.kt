@@ -22,7 +22,7 @@ object BackupCrypto {
     private const val SEGMENT = 1 shl 20
 
     class WrongPasswordOrCorrupt(cause: Throwable? = null) : Exception("Backup could not be decrypted", cause)
-    class NotABackup : Exception("Not an ASH backup file")
+    class NotABackup : Exception("Not an ashOS backup file")
 
     fun encryptingStream(out: OutputStream, password: CharArray, iterations: Int = DEFAULT_ITERATIONS): OutputStream {
         val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }

@@ -48,39 +48,39 @@
     <string name="saving">सेव हो रहा है…</string>
     <string name="not_set">तय नहीं</string>
 
-    <string name="cd_ash_logo">ASH लोगो</string>
+    <string name="cd_ash_logo">ashOS लोगो</string>
     <string name="cd_back">वापस</string>
     <string name="cd_clear">साफ़ करें</string>
     <string name="cd_clear_date">तारीख हटाएँ</string>
     <string name="cd_document_page">दस्तावेज़ का पेज</string>
     <string name="cd_pick_date">तारीख चुनें</string>
 
-    <string name="onb1_title">मिलिए ASH से।</string>
-    <string name="onb1_body">आप जिएँ, ASH याद रखे। बिल, दस्तावेज़, डिलीवरी और समय-सीमाएँ, सब एक शांत जगह पर।</string>
+    <string name="onb1_title">मिलिए ashOS से।</string>
+    <string name="onb1_body">आप जिएँ, ashOS याद रखे। बिल, दस्तावेज़, डिलीवरी और समय-सीमाएँ, सब एक शांत जगह पर।</string>
     <string name="onb2_title">आपकी डिजिटल ज़िंदगी, व्यवस्थित।</string>
-    <string name="onb2_body">आप जिन नोटिफ़िकेशन की अनुमति देते हैं, ASH उन्हें साफ़ रिकॉर्ड में बदलता है और बताता है कि किस पर ध्यान देना है।</string>
+    <string name="onb2_body">आप जिन नोटिफ़िकेशन की अनुमति देते हैं, ashOS उन्हें साफ़ रिकॉर्ड में बदलता है और बताता है कि किस पर ध्यान देना है।</string>
     <string name="onb3_title">आपका डेटा इसी फ़ोन पर रहता है।</string>
-    <string name="onb3_body">ASH के पास इंटरनेट की अनुमति ही नहीं है। न क्लाउड, न अकाउंट, न एनालिटिक्स। सब कुछ आपके फ़ोन पर एन्क्रिप्टेड है और आप कभी भी सब हटा सकते हैं।</string>
-    <string name="onb4_title">चुनें कि ASH क्या देख सकता है।</string>
-    <string name="onb4_body">आप तय करते हैं कि ASH किन ऐप को पढ़े। सब कुछ वैकल्पिक है और बाद में सेटिंग में बदला जा सकता है।</string>
+    <string name="onb3_body">ashOS के पास इंटरनेट की अनुमति ही नहीं है। न क्लाउड, न अकाउंट, न एनालिटिक्स। सब कुछ आपके फ़ोन पर एन्क्रिप्टेड है और आप कभी भी सब हटा सकते हैं।</string>
+    <string name="onb4_title">चुनें कि ashOS क्या देख सकता है।</string>
+    <string name="onb4_body">आप तय करते हैं कि ashOS किन ऐप को पढ़े। सब कुछ वैकल्पिक है और बाद में सेटिंग में बदला जा सकता है।</string>
 
     <string name="perm_title">अनुमतियाँ चुनें</string>
-    <string name="perm_intro">ASH इनके बिना भी चलता है। हर अनुमति कुछ नया जोड़ती है और आप उसे बाद में बंद कर सकते हैं।</string>
+    <string name="perm_intro">ashOS इनके बिना भी चलता है। हर अनुमति कुछ नया जोड़ती है और आप उसे बाद में बंद कर सकते हैं।</string>
     <string name="perm_notifications_header">नोटिफ़िकेशन</string>
-    <string name="perm_notifications_footer">नोटिफ़िकेशन ऐक्सेस से ASH नीचे चालू किए गए ऐप (जैसे बैंक SMS, Amazon, IRCTC) के नोटिफ़िकेशन इसी फ़ोन पर पढ़ता है और कहीं नहीं भेजता। OTP और पासवर्ड अनदेखे किए जाते हैं।</string>
+    <string name="perm_notifications_footer">नोटिफ़िकेशन ऐक्सेस से ashOS नीचे चालू किए गए ऐप (जैसे बैंक SMS, Amazon, IRCTC) के नोटिफ़िकेशन इसी फ़ोन पर पढ़ता है और कहीं नहीं भेजता। OTP और पासवर्ड अनदेखे किए जाते हैं।</string>
     <string name="perm_notification_access">नोटिफ़िकेशन ऐक्सेस</string>
     <string name="perm_notification_access_desc">बिल, भुगतान और डिलीवरी अपने आप व्यवस्थित करें</string>
     <string name="perm_on">चालू</string>
-    <string name="perm_sources">ASH कौन से ऐप पढ़ सकता है</string>
+    <string name="perm_sources">ashOS कौन से ऐप पढ़ सकता है</string>
     <string name="perm_sources_desc">%1$d चालू</string>
     <string name="perm_reminders_header">रिमाइंडर</string>
-    <string name="perm_reminders_footer">ASH नोटिफ़िकेशन का उपयोग सिर्फ़ ड्यू डेट और एक्सपायरी याद दिलाने के लिए करता है।</string>
+    <string name="perm_reminders_footer">ashOS नोटिफ़िकेशन का उपयोग सिर्फ़ ड्यू डेट और एक्सपायरी याद दिलाने के लिए करता है।</string>
     <string name="perm_post_notifications">रिमाइंडर की अनुमति दें</string>
     <string name="perm_post_notifications_desc">किसी काम की तारीख से पहले याद दिलाएँ</string>
     <string name="perm_camera_later">कैमरा सिर्फ़ दस्तावेज़ स्कैन करते समय माँगा जाता है।</string>
 
-    <string name="sources_title">ASH कौन से ऐप पढ़ सकता है</string>
-    <string name="sources_intro">ASH सिर्फ़ उन्हीं ऐप के नोटिफ़िकेशन पढ़ता है जिन्हें आप चालू करते हैं। बाकी सब अनदेखा होता है और सेव नहीं होता।</string>
+    <string name="sources_title">ashOS कौन से ऐप पढ़ सकता है</string>
+    <string name="sources_intro">ashOS सिर्फ़ उन्हीं ऐप के नोटिफ़िकेशन पढ़ता है जिन्हें आप चालू करते हैं। बाकी सब अनदेखा होता है और सेव नहीं होता।</string>
     <string name="sources_suggested">इस फ़ोन पर सुझाए गए</string>
     <string name="sources_other">अन्य ऐप</string>
     <string name="sources_other_footer">कोई ऐप नोटिफ़िकेशन भेजने के बाद यहाँ दिखता है। आप चालू करें तब तक वह बंद रहता है।</string>
@@ -90,9 +90,9 @@
     <string name="sources_empty_title">कोई समर्थित ऐप नहीं मिला</string>
     <string name="sources_empty_body">नोटिफ़िकेशन भेजने के बाद ऐप यहाँ दिखेंगे।</string>
 
-    <string name="lock_title">ASH लॉक है</string>
+    <string name="lock_title">ashOS लॉक है</string>
     <string name="lock_body">फ़िंगरप्रिंट या स्क्रीन लॉक से खोलें।</string>
-    <string name="lock_prompt_title">ASH अनलॉक करें</string>
+    <string name="lock_prompt_title">ashOS अनलॉक करें</string>
     <string name="lock_prompt_subtitle">आपका डेटा इसी फ़ोन पर रहता है</string>
     <string name="lock_unavailable">ऐप लॉक के लिए फ़ोन पर स्क्रीन लॉक सेट करें।</string>
 
@@ -100,7 +100,7 @@
     <string name="greeting_afternoon">नमस्कार</string>
     <string name="greeting_evening">शुभ संध्या</string>
     <string name="home_question">किस पर ध्यान देना है?</string>
-    <string name="home_no_sources">अपने आप व्यवस्थित करने के लिए चुनें कि ASH कौन से ऐप पढ़ सकता है।</string>
+    <string name="home_no_sources">अपने आप व्यवस्थित करने के लिए चुनें कि ashOS कौन से ऐप पढ़ सकता है।</string>
     <string name="home_upcoming_payments">आने वाले भुगतान</string>
     <string name="home_recurring">आप हर महीने लगभग %1$s नियमित भुगतानों पर खर्च करते हैं।</string>
     <string name="home_detected_documents">जल्द एक्सपायर होने वाले दस्तावेज़</string>
@@ -115,7 +115,7 @@
     <string name="expected_on">अपेक्षित %1$s</string>
     <string name="why_title">यह यहाँ क्यों है?</string>
     <string name="why_total">प्राथमिकता स्कोर</string>
-    <string name="why_footer">ASH एक सरल, तय फ़ॉर्मूले से क्रम तय करता है: तात्कालिकता + समय-सीमा की नज़दीकी + महत्व। कोई AI इस्तेमाल नहीं होता।</string>
+    <string name="why_footer">ashOS एक सरल, तय फ़ॉर्मूले से क्रम तय करता है: तात्कालिकता + समय-सीमा की नज़दीकी + महत्व। कोई AI इस्तेमाल नहीं होता।</string>
     <string name="score_urgency">तात्कालिकता</string>
     <string name="score_proximity">समय-सीमा की नज़दीकी</string>
     <string name="score_importance">महत्व</string>
@@ -124,19 +124,19 @@
 
     <string name="empty_attention_title">अभी किसी चीज़ पर ध्यान देने की ज़रूरत नहीं।</string>
     <string name="empty_attention_body">सब कुछ ठीक है।</string>
-    <string name="empty_home_body">ASH अभी आपकी डिजिटल ज़िंदगी से नहीं जुड़ा है। शुरू करने के लिए नोटिफ़िकेशन ऐक्सेस चालू करें या एक बिल जोड़ें।</string>
-    <string name="empty_inbox_title">ASH अभी आपकी डिजिटल ज़िंदगी से नहीं जुड़ा है।</string>
+    <string name="empty_home_body">ashOS अभी आपकी डिजिटल ज़िंदगी से नहीं जुड़ा है। शुरू करने के लिए नोटिफ़िकेशन ऐक्सेस चालू करें या एक बिल जोड़ें।</string>
+    <string name="empty_inbox_title">ashOS अभी आपकी डिजिटल ज़िंदगी से नहीं जुड़ा है।</string>
     <string name="empty_inbox_body">जिन ऐप की आप अनुमति देंगे, उनकी चीज़ें यहाँ दिखेंगी।</string>
     <string name="empty_vault_title">आपके ज़रूरी दस्तावेज़ यहाँ रहेंगे।</string>
     <string name="empty_vault_body">आधार, पैन, लाइसेंस, बीमा और बहुत कुछ जोड़ें। ये एन्क्रिप्टेड रहते हैं और इस फ़ोन से बाहर नहीं जाते।</string>
     <string name="empty_reminders_title">अभी किसी चीज़ पर ध्यान देने की ज़रूरत नहीं।</string>
-    <string name="empty_reminders_body">ASH ड्यू डेट और एक्सपायरी के लिए अपने आप रिमाइंडर बनाता है।</string>
+    <string name="empty_reminders_body">ashOS ड्यू डेट और एक्सपायरी के लिए अपने आप रिमाइंडर बनाता है।</string>
     <string name="empty_txn_title">आपकी वित्तीय गतिविधि यहाँ दिखेगी।</string>
     <string name="empty_txn_body">अनुमति दिए गए बैंक और UPI ऐप के भुगतान अपने आप दिखेंगे।</string>
     <string name="empty_bills_title">अभी कोई बिल नहीं</string>
-    <string name="empty_bills_body">ASH जो बिल पहचानेगा या आप जोड़ेंगे, वे यहाँ दिखेंगे।</string>
+    <string name="empty_bills_body">ashOS जो बिल पहचानेगा या आप जोड़ेंगे, वे यहाँ दिखेंगे।</string>
     <string name="empty_subs_title">अभी कोई नियमित भुगतान नहीं</string>
-    <string name="empty_subs_body">ASH आपके इतिहास से दोहराए जाने वाले भुगतान पहचानता है, या आप खुद जोड़ सकते हैं।</string>
+    <string name="empty_subs_body">ashOS आपके इतिहास से दोहराए जाने वाले भुगतान पहचानता है, या आप खुद जोड़ सकते हैं।</string>
     <string name="empty_vehicles_title">अभी कोई वाहन नहीं</string>
     <string name="empty_vehicles_body">बीमा, PUC और सर्विस की तारीखें ट्रैक करने के लिए वाहन जोड़ें।</string>
     <string name="empty_policies_title">अभी कोई बीमा पॉलिसी नहीं</string>
@@ -144,15 +144,15 @@
     <string name="empty_warranties_title">अभी कोई वारंटी नहीं</string>
     <string name="empty_warranties_body">वारंटी जोड़ें ताकि पता रहे कि वह कब खत्म होगी।</string>
 
-    <string name="error_listener_disabled">नोटिफ़िकेशन ऐक्सेस बंद होने से ASH नोटिफ़िकेशन नहीं पढ़ सकता।</string>
-    <string name="error_ocr">ASH इस दस्तावेज़ को भरोसे के साथ नहीं पढ़ सका।</string>
+    <string name="error_listener_disabled">नोटिफ़िकेशन ऐक्सेस बंद होने से ashOS नोटिफ़िकेशन नहीं पढ़ सकता।</string>
+    <string name="error_ocr">ashOS इस दस्तावेज़ को भरोसे के साथ नहीं पढ़ सका।</string>
     <string name="error_amount">सही राशि डालें</string>
     <string name="error_file_too_large">यह फ़ाइल 50 MB से बड़ी है।</string>
     <string name="error_unsupported_file">सिर्फ़ PDF और इमेज जोड़ी जा सकती हैं।</string>
-    <string name="error_file_read">ASH वह फ़ाइल नहीं पढ़ सका।</string>
-    <string name="error_encryption">ASH इस फ़ाइल को एन्क्रिप्ट या डिक्रिप्ट नहीं कर सका।</string>
+    <string name="error_file_read">ashOS वह फ़ाइल नहीं पढ़ सका।</string>
+    <string name="error_encryption">ashOS इस फ़ाइल को एन्क्रिप्ट या डिक्रिप्ट नहीं कर सका।</string>
     <string name="error_wrong_password">गलत पासवर्ड, या बैकअप खराब है।</string>
-    <string name="error_corrupt_backup">यह ASH बैकअप फ़ाइल नहीं है।</string>
+    <string name="error_corrupt_backup">यह ashOS बैकअप फ़ाइल नहीं है।</string>
     <string name="error_storage">फ़ोन में जगह नहीं बची है।</string>
     <string name="error_unknown">कुछ गड़बड़ हुई। विवरण डायग्नोस्टिक्स में है।</string>
     <string name="error_not_found">यह आइटम अब मौजूद नहीं है।</string>
@@ -164,8 +164,8 @@
     <string name="filter_handled">निपटाए</string>
     <string name="filter_archived">संग्रहित</string>
     <string name="filter_all_categories">सभी श्रेणियाँ</string>
-    <string name="review_prompt">ASH को कुछ ज़रूरी मिला है। कृपया पुष्टि करें।</string>
-    <string name="review_prompt_confidence">ASH को कुछ ज़रूरी मिला है (%1$d%% भरोसा)। कृपया पुष्टि करें या सुधारें।</string>
+    <string name="review_prompt">ashOS को कुछ ज़रूरी मिला है। कृपया पुष्टि करें।</string>
+    <string name="review_prompt_confidence">ashOS को कुछ ज़रूरी मिला है (%1$d%% भरोसा)। कृपया पुष्टि करें या सुधारें।</string>
     <string name="status_unread">नया</string>
     <string name="status_review">जाँचें</string>
     <string name="status_action">कार्रवाई ज़रूरी</string>
@@ -176,7 +176,7 @@
     <string name="detail_parser_footer">%1$s नियमों से %2$d%% भरोसे के साथ पढ़ा गया।</string>
     <string name="source_manual">आपने जोड़ा</string>
     <string name="delete_record_title">यह आइटम हटाएँ?</string>
-    <string name="delete_record_body">यह ASH से हट जाएगा। 30 दिन बाद इसे वापस नहीं लाया जा सकता।</string>
+    <string name="delete_record_body">यह ashOS से हट जाएगा। 30 दिन बाद इसे वापस नहीं लाया जा सकता।</string>
     <string name="record_new_title">नया आइटम</string>
     <string name="record_edit_title">आइटम बदलें</string>
     <string name="txn_corrected">सुधारा गया</string>
@@ -327,8 +327,8 @@
         <item quantity="other">%d दिन पहले</item>
     </plurals>
     <plurals name="home_review_count">
-        <item quantity="one">ASH को %d ज़रूरी चीज़ मिली है।</item>
-        <item quantity="other">ASH को %d ज़रूरी चीज़ें मिली हैं।</item>
+        <item quantity="one">ashOS को %d ज़रूरी चीज़ मिली है।</item>
+        <item quantity="other">ashOS को %d ज़रूरी चीज़ें मिली हैं।</item>
     </plurals>
     <plurals name="search_count">
         <item quantity="one">%d नतीजा</item>
@@ -347,8 +347,8 @@
     <string name="reminder_edit">रिमाइंडर बदलें</string>
     <string name="reminder_fired">भेजा गया</string>
     <string name="reminder_past">भविष्य का समय चुनें।</string>
-    <string name="reminders_no_permission">ASH के रिमाइंडर बंद हैं। पाने के लिए सिस्टम सेटिंग में नोटिफ़िकेशन की अनुमति दें।</string>
-    <string name="reminder_public_title">ASH रिमाइंडर</string>
+    <string name="reminders_no_permission">ashOS के रिमाइंडर बंद हैं। पाने के लिए सिस्टम सेटिंग में नोटिफ़िकेशन की अनुमति दें।</string>
+    <string name="reminder_public_title">ashOS रिमाइंडर</string>
     <string name="reminder_due_today">आज ड्यू</string>
     <string name="reminder_expires_today">आज एक्सपायर</string>
     <string name="reminder_renews_today">आज रिन्यू</string>
@@ -379,7 +379,7 @@
     <string name="channel_reminders">रिमाइंडर</string>
     <string name="channel_reminders_desc">ड्यू डेट, एक्सपायरी और रिन्यूअल</string>
     <string name="channel_review">जाँचने वाली चीज़ें</string>
-    <string name="channel_review_desc">ASH को मिली चीज़ें जिनकी पुष्टि चाहिए</string>
+    <string name="channel_review_desc">ashOS को मिली चीज़ें जिनकी पुष्टि चाहिए</string>
 
     <string name="vault_title">वॉल्ट</string>
     <string name="vault_add">दस्तावेज़ जोड़ें</string>
@@ -394,13 +394,13 @@
     <string name="vault_reading">दस्तावेज़ एन्क्रिप्ट करके पढ़ा जा रहा है…</string>
     <string name="vault_scan_title">स्कैन %1$s</string>
     <string name="vault_untitled">दस्तावेज़</string>
-    <string name="ocr_review_banner">ASH ने ये विवरण दस्तावेज़ से पढ़े हैं। सेव करने से पहले जाँच लें।</string>
+    <string name="ocr_review_banner">ashOS ने ये विवरण दस्तावेज़ से पढ़े हैं। सेव करने से पहले जाँच लें।</string>
     <string name="ocr_show_text">पहचाना गया टेक्स्ट दिखाएँ</string>
     <string name="ocr_hide_text">पहचाना गया टेक्स्ट छिपाएँ</string>
     <string name="delete_document_title">यह दस्तावेज़ हटाएँ?</string>
     <string name="delete_document_body">एन्क्रिप्टेड फ़ाइल तुरंत इस फ़ोन से हट जाएगी। इसे वापस नहीं लाया जा सकता।</string>
     <string name="share_document_title">एक कॉपी शेयर करें?</string>
-    <string name="share_document_body">चुने गए ऐप को डिक्रिप्ट की हुई कॉपी मिलेगी। उसके बाद ASH उसे सुरक्षित नहीं रख सकता।</string>
+    <string name="share_document_body">चुने गए ऐप को डिक्रिप्ट की हुई कॉपी मिलेगी। उसके बाद ashOS उसे सुरक्षित नहीं रख सकता।</string>
     <string name="camera_denied_title">कैमरा ऐक्सेस बंद है</string>
     <string name="camera_denied_body">कैमरा सिर्फ़ दस्तावेज़ स्कैन के लिए चाहिए। आप फिर भी PDF और फ़ोटो जोड़ सकते हैं।</string>
     <string name="camera_hint">दस्तावेज़ को फ़्रेम के अंदर रखें</string>
@@ -421,7 +421,7 @@
     <string name="sub_add">सब्सक्रिप्शन जोड़ें</string>
     <string name="sub_edit">सब्सक्रिप्शन बदलें</string>
     <string name="sub_delete">सब्सक्रिप्शन हटाएँ?</string>
-    <string name="sub_detected">ASH ने पहचाना</string>
+    <string name="sub_detected">ashOS ने पहचाना</string>
     <string name="sub_inactive">रुका हुआ</string>
     <string name="vehicles_title">वाहन</string>
     <string name="vehicle_add">वाहन जोड़ें</string>
@@ -463,10 +463,10 @@
     <string name="settings_title">सेटिंग</string>
     <string name="settings_privacy">निजता</string>
     <string name="settings_store_text">मूल नोटिफ़िकेशन टेक्स्ट रखें</string>
-    <string name="settings_store_text_desc">एन्क्रिप्ट करके रखा जाता है ताकि आप देख सकें ASH ने क्या पढ़ा। बंद करने पर सिर्फ़ निकाले गए विवरण रहेंगे।</string>
+    <string name="settings_store_text_desc">एन्क्रिप्ट करके रखा जाता है ताकि आप देख सकें ashOS ने क्या पढ़ा। बंद करने पर सिर्फ़ निकाले गए विवरण रहेंगे।</string>
     <string name="settings_security">सुरक्षा</string>
     <string name="settings_app_lock">ऐप लॉक</string>
-    <string name="settings_app_lock_desc">ASH खोलते समय फ़िंगरप्रिंट या स्क्रीन लॉक माँगें</string>
+    <string name="settings_app_lock_desc">ashOS खोलते समय फ़िंगरप्रिंट या स्क्रीन लॉक माँगें</string>
     <string name="settings_auto_lock">इसके बाद लॉक करें</string>
     <string name="settings_secure_all">हर जगह स्क्रीनशॉट रोकें</string>
     <string name="settings_secure_all_desc">वॉल्ट, पैसा और बैकअप स्क्रीन हमेशा सुरक्षित रहती हैं</string>
@@ -489,12 +489,12 @@
     <string name="timeout_5m">5 मिनट</string>
     <string name="timeout_15m">15 मिनट</string>
     <string name="about_version">वर्ज़न</string>
-    <string name="about_footer">न एनालिटिक्स, न विज्ञापन, न क्लाउड। आप जिएँ, ASH याद रखे।</string>
+    <string name="about_footer">न एनालिटिक्स, न विज्ञापन, न क्लाउड। आप जिएँ, ashOS याद रखे।</string>
 
     <string name="privacy_title">निजता केंद्र</string>
     <string name="privacy_promise">आपका डेटा इसी फ़ोन पर रहता है।</string>
     <string name="privacy_promise_short">आपका डेटा इसी फ़ोन पर रहता है</string>
-    <string name="privacy_promise_body">ASH बिना इंटरनेट ऐक्सेस के इंस्टॉल होता है, इसलिए उसके पास कुछ भी बाहर भेजने का कोई तरीका नहीं है।</string>
+    <string name="privacy_promise_body">ashOS बिना इंटरनेट ऐक्सेस के इंस्टॉल होता है, इसलिए उसके पास कुछ भी बाहर भेजने का कोई तरीका नहीं है।</string>
     <string name="privacy_stored_header">फ़ोन पर रखा डेटा</string>
     <string name="privacy_notifications">नोटिफ़िकेशन</string>
     <string name="privacy_records">रिकॉर्ड</string>
@@ -505,10 +505,10 @@
     <string name="privacy_policies">बीमा पॉलिसी</string>
     <string name="privacy_subscriptions">सब्सक्रिप्शन</string>
     <string name="privacy_sent_header">फ़ोन से बाहर भेजा गया डेटा</string>
-    <string name="privacy_sent_label">ASH ने भेजा</string>
+    <string name="privacy_sent_label">ashOS ने भेजा</string>
     <string name="privacy_nothing">कुछ नहीं</string>
     <string name="privacy_sent_check">जाँचें</string>
-    <string name="privacy_sent_footer">इस फ़ोन पर जाँचा गया: ASH के पास INTERNET अनुमति नहीं है।</string>
+    <string name="privacy_sent_footer">इस फ़ोन पर जाँचा गया: ashOS के पास INTERNET अनुमति नहीं है।</string>
     <string name="privacy_internet_present">चेतावनी: इस बिल्ड के पास INTERNET अनुमति है। इसकी रिपोर्ट करें।</string>
     <string name="privacy_protection_header">सुरक्षा कैसे होती है</string>
     <string name="privacy_db_encrypted">डेटाबेस एन्क्रिप्टेड</string>
@@ -520,7 +520,7 @@
     <string name="privacy_keys_tee">फ़ोन के सुरक्षित हार्डवेयर (Keystore) में</string>
     <string name="privacy_keys_checking">जाँच हो रही है…</string>
     <string name="privacy_backup_off">क्लाउड बैकअप बंद</string>
-    <string name="privacy_backup_off_desc">ASH के लिए Android बैकअप और डिवाइस ट्रांसफ़र बंद हैं</string>
+    <string name="privacy_backup_off_desc">ashOS के लिए Android बैकअप और डिवाइस ट्रांसफ़र बंद हैं</string>
     <string name="privacy_control_header">नियंत्रण आपके हाथ में</string>
     <string name="privacy_revoke_notifications">नोटिफ़िकेशन ऐक्सेस बंद करें</string>
     <string name="privacy_export_delete">सब एक्सपोर्ट करें या हटाएँ</string>
@@ -529,7 +529,7 @@
     <string name="diagnostics_title">डायग्नोस्टिक्स</string>
     <string name="diagnostics_desc">समस्या सुलझाने के लिए स्थानीय गिनती और लॉग</string>
     <string name="diag_counters">गतिविधि</string>
-    <string name="diag_footer">ये संख्याएँ आपके फ़ोन पर ही रहती हैं। ASH में कोई एनालिटिक्स नहीं है।</string>
+    <string name="diag_footer">ये संख्याएँ आपके फ़ोन पर ही रहती हैं। ashOS में कोई एनालिटिक्स नहीं है।</string>
     <string name="diag_processed">प्रोसेस किए नोटिफ़िकेशन</string>
     <string name="diag_created">बने रिकॉर्ड</string>
     <string name="diag_review">जाँच के लिए भेजे</string>
@@ -565,16 +565,16 @@
     <string name="backup_export_footer">सभी रिकॉर्ड और दस्तावेज़ों वाली एक पासवर्ड-सुरक्षित फ़ाइल बनती है। इसे जहाँ चाहें सेव करें।</string>
     <string name="backup_import_header">इम्पोर्ट</string>
     <string name="backup_import">बैकअप से वापस लाएँ</string>
-    <string name="backup_import_footer">ASH में मौजूद सब कुछ बैकअप की सामग्री से बदल जाएगा।</string>
+    <string name="backup_import_footer">ashOS में मौजूद सब कुछ बैकअप की सामग्री से बदल जाएगा।</string>
     <string name="backup_delete_header">हटाएँ</string>
     <string name="backup_delete_all">सारा डेटा हटाएँ</string>
-    <string name="backup_delete_footer">ASH में रखा हर रिकॉर्ड, दस्तावेज़, रिमाइंडर और लॉग हमेशा के लिए हट जाएगा।</string>
+    <string name="backup_delete_footer">ashOS में रखा हर रिकॉर्ड, दस्तावेज़, रिमाइंडर और लॉग हमेशा के लिए हट जाएगा।</string>
     <string name="backup_delete_word">DELETE</string>
-    <string name="backup_delete_body">इससे इस फ़ोन पर ASH का सारा डेटा हमेशा के लिए हट जाएगा। पुष्टि के लिए %1$s लिखें।</string>
+    <string name="backup_delete_body">इससे इस फ़ोन पर ashOS का सारा डेटा हमेशा के लिए हट जाएगा। पुष्टि के लिए %1$s लिखें।</string>
     <string name="backup_delete_prompt">सारा डेटा हटाने की पुष्टि करें</string>
     <string name="backup_password_set">बैकअप पासवर्ड सेट करें</string>
     <string name="backup_password_enter">बैकअप पासवर्ड डालें</string>
-    <string name="backup_password_warning">कम से कम 8 अक्षर। पासवर्ड भूल गए तो बैकअप कोई नहीं खोल पाएगा, ASH भी नहीं।</string>
+    <string name="backup_password_warning">कम से कम 8 अक्षर। पासवर्ड भूल गए तो बैकअप कोई नहीं खोल पाएगा, ashOS भी नहीं।</string>
     <string name="backup_password">पासवर्ड</string>
     <string name="backup_password_repeat">पासवर्ड दोबारा डालें</string>
     <string name="backup_working">काम चल रहा है…</string>

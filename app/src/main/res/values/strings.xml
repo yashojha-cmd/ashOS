@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">ASH</string>
+    <string name="app_name" translatable="false">ashOS</string>
 
     <!-- Tabs -->
     <string name="tab_home">Home</string>
@@ -53,7 +53,7 @@
     <string name="not_set">Not set</string>
 
     <!-- Accessibility -->
-    <string name="cd_ash_logo">ASH logo</string>
+    <string name="cd_ash_logo">ashOS logo</string>
     <string name="cd_back">Back</string>
     <string name="cd_clear">Clear</string>
     <string name="cd_clear_date">Clear date</string>
@@ -61,34 +61,34 @@
     <string name="cd_pick_date">Pick a date</string>
 
     <!-- Onboarding -->
-    <string name="onb1_title">Meet ASH.</string>
-    <string name="onb1_body">You live. ASH remembers. Bills, documents, deliveries and deadlines, organised in one calm place.</string>
+    <string name="onb1_title">Meet ashOS.</string>
+    <string name="onb1_body">You live. ashOS remembers. Bills, documents, deliveries and deadlines, organised in one calm place.</string>
     <string name="onb2_title">Your digital life, organised.</string>
-    <string name="onb2_body">ASH turns the notifications you allow into clear records and tells you what needs your attention, without you having to remember where it came from.</string>
+    <string name="onb2_body">ashOS turns the notifications you allow into clear records and tells you what needs your attention, without you having to remember where it came from.</string>
     <string name="onb3_title">Your data stays on this device.</string>
-    <string name="onb3_body">ASH has no internet permission. No cloud, no accounts, no analytics. Everything is encrypted on your phone, and you can delete it all at any time.</string>
-    <string name="onb4_title">Choose what ASH can access.</string>
-    <string name="onb4_body">You decide which apps ASH may read. Everything is optional and you can change it later in Settings.</string>
+    <string name="onb3_body">ashOS has no internet permission. No cloud, no accounts, no analytics. Everything is encrypted on your phone, and you can delete it all at any time.</string>
+    <string name="onb4_title">Choose what ashOS can access.</string>
+    <string name="onb4_body">You decide which apps ashOS may read. Everything is optional and you can change it later in Settings.</string>
 
     <!-- Permissions -->
     <string name="perm_title">Choose access</string>
-    <string name="perm_intro">ASH works without any of these. Each one adds something, and you can turn it off later.</string>
+    <string name="perm_intro">ashOS works without any of these. Each one adds something, and you can turn it off later.</string>
     <string name="perm_notifications_header">Notifications</string>
-    <string name="perm_notifications_footer">With notification access, Android lets ASH see notifications from apps you turn on below, such as bank SMS, Amazon or IRCTC. ASH reads them on this phone and never sends them anywhere. OTPs and passwords are ignored.</string>
+    <string name="perm_notifications_footer">With notification access, Android lets ashOS see notifications from apps you turn on below, such as bank SMS, Amazon or IRCTC. ashOS reads them on this phone and never sends them anywhere. OTPs and passwords are ignored.</string>
     <string name="perm_notification_access">Notification access</string>
-    <string name="perm_notification_access_desc">Lets ASH organise bills, payments and deliveries</string>
+    <string name="perm_notification_access_desc">Lets ashOS organise bills, payments and deliveries</string>
     <string name="perm_on">On</string>
-    <string name="perm_sources">Apps ASH can read</string>
+    <string name="perm_sources">Apps ashOS can read</string>
     <string name="perm_sources_desc">%1$d turned on</string>
     <string name="perm_reminders_header">Reminders</string>
-    <string name="perm_reminders_footer">ASH uses notifications only to remind you about due dates and expiries.</string>
+    <string name="perm_reminders_footer">ashOS uses notifications only to remind you about due dates and expiries.</string>
     <string name="perm_post_notifications">Allow reminders</string>
     <string name="perm_post_notifications_desc">Get a nudge before something is due</string>
-    <string name="perm_camera_later">ASH asks for the camera only when you scan a document.</string>
+    <string name="perm_camera_later">ashOS asks for the camera only when you scan a document.</string>
 
     <!-- Sources -->
-    <string name="sources_title">Apps ASH can read</string>
-    <string name="sources_intro">ASH only reads notifications from apps you turn on. Everything else is ignored and never stored.</string>
+    <string name="sources_title">Apps ashOS can read</string>
+    <string name="sources_intro">ashOS only reads notifications from apps you turn on. Everything else is ignored and never stored.</string>
     <string name="sources_suggested">Suggested on this phone</string>
     <string name="sources_other">Other apps</string>
     <string name="sources_other_footer">Apps appear here after they post a notification. They stay off until you turn them on.</string>
@@ -99,9 +99,9 @@
     <string name="sources_empty_body">Apps will appear here once they post a notification.</string>
 
     <!-- Lock -->
-    <string name="lock_title">ASH is locked</string>
+    <string name="lock_title">ashOS is locked</string>
     <string name="lock_body">Unlock with your fingerprint or screen lock.</string>
-    <string name="lock_prompt_title">Unlock ASH</string>
+    <string name="lock_prompt_title">Unlock ashOS</string>
     <string name="lock_prompt_subtitle">Your data stays on this device</string>
     <string name="lock_unavailable">Set a screen lock on your phone to use App lock.</string>
 
@@ -110,7 +110,7 @@
     <string name="greeting_afternoon">Good afternoon</string>
     <string name="greeting_evening">Good evening</string>
     <string name="home_question">What needs your attention?</string>
-    <string name="home_no_sources">Choose which apps ASH can read to start organising automatically.</string>
+    <string name="home_no_sources">Choose which apps ashOS can read to start organising automatically.</string>
     <string name="home_upcoming_payments">Upcoming payments</string>
     <string name="home_recurring">You spend about %1$s/month on recurring payments.</string>
     <string name="home_detected_documents">Documents expiring soon</string>
@@ -125,7 +125,7 @@
     <string name="expected_on">Expected %1$s</string>
     <string name="why_title">Why is this here?</string>
     <string name="why_total">Priority score</string>
-    <string name="why_footer">ASH ranks items with a simple, fixed formula: urgency + deadline proximity + importance. No AI is involved.</string>
+    <string name="why_footer">ashOS ranks items with a simple, fixed formula: urgency + deadline proximity + importance. No AI is involved.</string>
     <string name="score_urgency">Urgency</string>
     <string name="score_proximity">Deadline proximity</string>
     <string name="score_importance">Importance</string>
@@ -135,19 +135,19 @@
     <!-- Empty states -->
     <string name="empty_attention_title">Nothing needs your attention.</string>
     <string name="empty_attention_body">You\'re all caught up.</string>
-    <string name="empty_home_body">ASH hasn\'t connected to your digital life yet. Turn on notification access or add a bill to begin.</string>
-    <string name="empty_inbox_title">ASH hasn\'t connected to your digital life yet.</string>
+    <string name="empty_home_body">ashOS hasn\'t connected to your digital life yet. Turn on notification access or add a bill to begin.</string>
+    <string name="empty_inbox_title">ashOS hasn\'t connected to your digital life yet.</string>
     <string name="empty_inbox_body">Items from the apps you allow will appear here.</string>
     <string name="empty_vault_title">Your important documents will live here.</string>
     <string name="empty_vault_body">Add Aadhaar, PAN, licence, insurance and more. They are encrypted and never leave this phone.</string>
     <string name="empty_reminders_title">Nothing needs your attention.</string>
-    <string name="empty_reminders_body">ASH creates reminders for due dates and expiries automatically.</string>
+    <string name="empty_reminders_body">ashOS creates reminders for due dates and expiries automatically.</string>
     <string name="empty_txn_title">Your financial activity will appear here.</string>
     <string name="empty_txn_body">Payments from the bank and UPI apps you allow show up automatically.</string>
     <string name="empty_bills_title">No bills yet</string>
-    <string name="empty_bills_body">Bills ASH detects or you add will appear here.</string>
+    <string name="empty_bills_body">Bills ashOS detects or you add will appear here.</string>
     <string name="empty_subs_title">No recurring payments yet</string>
-    <string name="empty_subs_body">ASH spots repeating payments from your history, or you can add one.</string>
+    <string name="empty_subs_body">ashOS spots repeating payments from your history, or you can add one.</string>
     <string name="empty_vehicles_title">No vehicles yet</string>
     <string name="empty_vehicles_body">Add a vehicle to track insurance, PUC and service dates.</string>
     <string name="empty_policies_title">No insurance policies yet</string>
@@ -156,15 +156,15 @@
     <string name="empty_warranties_body">Add a warranty so you know when it runs out.</string>
 
     <!-- Errors -->
-    <string name="error_listener_disabled">ASH can\'t read notifications because notification access is disabled.</string>
-    <string name="error_ocr">ASH couldn\'t confidently read this document.</string>
+    <string name="error_listener_disabled">ashOS can\'t read notifications because notification access is disabled.</string>
+    <string name="error_ocr">ashOS couldn\'t confidently read this document.</string>
     <string name="error_amount">Enter a valid amount</string>
     <string name="error_file_too_large">This file is larger than 50 MB.</string>
     <string name="error_unsupported_file">Only PDFs and images can be added.</string>
-    <string name="error_file_read">ASH couldn\'t read that file.</string>
-    <string name="error_encryption">ASH couldn\'t encrypt or decrypt this file.</string>
+    <string name="error_file_read">ashOS couldn\'t read that file.</string>
+    <string name="error_encryption">ashOS couldn\'t encrypt or decrypt this file.</string>
     <string name="error_wrong_password">Wrong password, or the backup is damaged.</string>
-    <string name="error_corrupt_backup">This isn\'t an ASH backup file.</string>
+    <string name="error_corrupt_backup">This isn\'t an ashOS backup file.</string>
     <string name="error_storage">Your phone is out of storage.</string>
     <string name="error_unknown">Something went wrong. Details are in Diagnostics.</string>
     <string name="error_not_found">This item no longer exists.</string>
@@ -177,8 +177,8 @@
     <string name="filter_handled">Handled</string>
     <string name="filter_archived">Archived</string>
     <string name="filter_all_categories">All categories</string>
-    <string name="review_prompt">ASH found something that may be important. Please confirm.</string>
-    <string name="review_prompt_confidence">ASH found something that may be important (%1$d%% sure). Please confirm or correct it.</string>
+    <string name="review_prompt">ashOS found something that may be important. Please confirm.</string>
+    <string name="review_prompt_confidence">ashOS found something that may be important (%1$d%% sure). Please confirm or correct it.</string>
     <string name="status_unread">New</string>
     <string name="status_review">Review</string>
     <string name="status_action">Action required</string>
@@ -189,7 +189,7 @@
     <string name="detail_parser_footer">Read by the %1$s rule set with %2$d%% confidence.</string>
     <string name="source_manual">Added by you</string>
     <string name="delete_record_title">Delete this item?</string>
-    <string name="delete_record_body">It will be removed from ASH. This can\'t be undone after 30 days.</string>
+    <string name="delete_record_body">It will be removed from ashOS. This can\'t be undone after 30 days.</string>
     <string name="record_new_title">New item</string>
     <string name="record_edit_title">Edit item</string>
     <string name="txn_corrected">Corrected</string>
@@ -343,8 +343,8 @@
         <item quantity="other">%d days ago</item>
     </plurals>
     <plurals name="home_review_count">
-        <item quantity="one">ASH found %d thing that may be important.</item>
-        <item quantity="other">ASH found %d things that may be important.</item>
+        <item quantity="one">ashOS found %d thing that may be important.</item>
+        <item quantity="other">ashOS found %d things that may be important.</item>
     </plurals>
     <plurals name="search_count">
         <item quantity="one">%d result</item>
@@ -364,8 +364,8 @@
     <string name="reminder_edit">Edit reminder</string>
     <string name="reminder_fired">Delivered</string>
     <string name="reminder_past">Choose a time in the future.</string>
-    <string name="reminders_no_permission">Reminders are off for ASH. Allow notifications in system settings to get them.</string>
-    <string name="reminder_public_title">ASH reminder</string>
+    <string name="reminders_no_permission">Reminders are off for ashOS. Allow notifications in system settings to get them.</string>
+    <string name="reminder_public_title">ashOS reminder</string>
     <string name="reminder_due_today">Due today</string>
     <string name="reminder_expires_today">Expires today</string>
     <string name="reminder_renews_today">Renews today</string>
@@ -396,7 +396,7 @@
     <string name="channel_reminders">Reminders</string>
     <string name="channel_reminders_desc">Due dates, expiries and renewals</string>
     <string name="channel_review">Items to review</string>
-    <string name="channel_review_desc">Things ASH found that need your confirmation</string>
+    <string name="channel_review_desc">Things ashOS found that need your confirmation</string>
 
     <!-- Vault -->
     <string name="vault_title">Vault</string>
@@ -412,15 +412,15 @@
     <string name="vault_reading">Encrypting and reading the document…</string>
     <string name="vault_scan_title">Scan %1$s</string>
     <string name="vault_untitled">Document</string>
-    <string name="ocr_review_banner">ASH read these details from the document. Please check them before saving.</string>
+    <string name="ocr_review_banner">ashOS read these details from the document. Please check them before saving.</string>
     <string name="ocr_show_text">Show recognised text</string>
     <string name="ocr_hide_text">Hide recognised text</string>
     <string name="delete_document_title">Delete this document?</string>
     <string name="delete_document_body">The encrypted file is removed from this phone immediately. This can\'t be undone.</string>
     <string name="share_document_title">Share a copy?</string>
-    <string name="share_document_body">A decrypted copy will be given to the app you choose. ASH can\'t protect it after that.</string>
+    <string name="share_document_body">A decrypted copy will be given to the app you choose. ashOS can\'t protect it after that.</string>
     <string name="camera_denied_title">Camera access is off</string>
-    <string name="camera_denied_body">ASH needs the camera only to scan documents. You can still add PDFs and photos.</string>
+    <string name="camera_denied_body">ashOS needs the camera only to scan documents. You can still add PDFs and photos.</string>
     <string name="camera_hint">Fit the document inside the frame</string>
 
     <!-- Life -->
@@ -440,7 +440,7 @@
     <string name="sub_add">Add subscription</string>
     <string name="sub_edit">Edit subscription</string>
     <string name="sub_delete">Delete subscription?</string>
-    <string name="sub_detected">Detected by ASH</string>
+    <string name="sub_detected">Detected by ashOS</string>
     <string name="sub_inactive">Paused</string>
     <string name="vehicles_title">Vehicles</string>
     <string name="vehicle_add">Add vehicle</string>
@@ -484,10 +484,10 @@
     <string name="settings_title">Settings</string>
     <string name="settings_privacy">Privacy</string>
     <string name="settings_store_text">Keep original notification text</string>
-    <string name="settings_store_text_desc">Stored encrypted so you can see exactly what ASH read. Turn off to keep only extracted details.</string>
+    <string name="settings_store_text_desc">Stored encrypted so you can see exactly what ashOS read. Turn off to keep only extracted details.</string>
     <string name="settings_security">Security</string>
     <string name="settings_app_lock">App lock</string>
-    <string name="settings_app_lock_desc">Ask for fingerprint or screen lock when opening ASH</string>
+    <string name="settings_app_lock_desc">Ask for fingerprint or screen lock when opening ashOS</string>
     <string name="settings_auto_lock">Lock after</string>
     <string name="settings_secure_all">Block screenshots everywhere</string>
     <string name="settings_secure_all_desc">Vault, money and backup screens are always protected</string>
@@ -508,13 +508,13 @@
     <string name="timeout_5m">5 minutes</string>
     <string name="timeout_15m">15 minutes</string>
     <string name="about_version">Version</string>
-    <string name="about_footer">No analytics. No ads. No cloud. You live. ASH remembers.</string>
+    <string name="about_footer">No analytics. No ads. No cloud. You live. ashOS remembers.</string>
 
     <!-- Privacy center -->
     <string name="privacy_title">Privacy Center</string>
     <string name="privacy_promise">Your data stays on this device.</string>
     <string name="privacy_promise_short">Your data stays on this device</string>
-    <string name="privacy_promise_body">ASH is installed without internet access, so it has no way to send anything out.</string>
+    <string name="privacy_promise_body">ashOS is installed without internet access, so it has no way to send anything out.</string>
     <string name="privacy_stored_header">Data stored locally</string>
     <string name="privacy_notifications">Notifications</string>
     <string name="privacy_records">Records</string>
@@ -525,10 +525,10 @@
     <string name="privacy_policies">Insurance policies</string>
     <string name="privacy_subscriptions">Subscriptions</string>
     <string name="privacy_sent_header">Data sent outside device</string>
-    <string name="privacy_sent_label">Sent by ASH</string>
+    <string name="privacy_sent_label">Sent by ashOS</string>
     <string name="privacy_nothing">Nothing</string>
     <string name="privacy_sent_check">Check</string>
-    <string name="privacy_sent_footer">Verified on this phone: ASH does not hold the INTERNET permission.</string>
+    <string name="privacy_sent_footer">Verified on this phone: ashOS does not hold the INTERNET permission.</string>
     <string name="privacy_internet_present">Warning: this build holds the INTERNET permission. Report this.</string>
     <string name="privacy_protection_header">How it is protected</string>
     <string name="privacy_db_encrypted">Database encrypted</string>
@@ -540,7 +540,7 @@
     <string name="privacy_keys_tee">In the phone\'s secure hardware (Keystore)</string>
     <string name="privacy_keys_checking">Checking…</string>
     <string name="privacy_backup_off">Cloud backup off</string>
-    <string name="privacy_backup_off_desc">Android backup and device transfer are disabled for ASH</string>
+    <string name="privacy_backup_off_desc">Android backup and device transfer are disabled for ashOS</string>
     <string name="privacy_control_header">You\'re in control</string>
     <string name="privacy_revoke_notifications">Turn off notification access</string>
     <string name="privacy_export_delete">Export or delete everything</string>
@@ -550,7 +550,7 @@
     <string name="diagnostics_title">Diagnostics</string>
     <string name="diagnostics_desc">Local counters and logs for troubleshooting</string>
     <string name="diag_counters">Activity</string>
-    <string name="diag_footer">These numbers stay on your phone. ASH has no analytics.</string>
+    <string name="diag_footer">These numbers stay on your phone. ashOS has no analytics.</string>
     <string name="diag_processed">Notifications processed</string>
     <string name="diag_created">Records created</string>
     <string name="diag_review">Sent for review</string>
@@ -587,16 +587,16 @@
     <string name="backup_export_footer">Creates one password-protected file with all records and documents. Save it wherever you like.</string>
     <string name="backup_import_header">Import</string>
     <string name="backup_import">Restore from backup</string>
-    <string name="backup_import_footer">Replaces everything in ASH with the contents of the backup.</string>
+    <string name="backup_import_footer">Replaces everything in ashOS with the contents of the backup.</string>
     <string name="backup_delete_header">Delete</string>
     <string name="backup_delete_all">Delete all data</string>
-    <string name="backup_delete_footer">Permanently removes every record, document, reminder and log stored by ASH.</string>
+    <string name="backup_delete_footer">Permanently removes every record, document, reminder and log stored by ashOS.</string>
     <string name="backup_delete_word">DELETE</string>
-    <string name="backup_delete_body">This permanently deletes everything ASH stored on this phone. Type %1$s to confirm.</string>
+    <string name="backup_delete_body">This permanently deletes everything ashOS stored on this phone. Type %1$s to confirm.</string>
     <string name="backup_delete_prompt">Confirm deleting all data</string>
     <string name="backup_password_set">Set a backup password</string>
     <string name="backup_password_enter">Enter backup password</string>
-    <string name="backup_password_warning">At least 8 characters. If you forget it, the backup cannot be opened by anyone, including ASH.</string>
+    <string name="backup_password_warning">At least 8 characters. If you forget it, the backup cannot be opened by anyone, including ashOS.</string>
     <string name="backup_password">Password</string>
     <string name="backup_password_repeat">Repeat password</string>
     <string name="backup_working">Working…</string>

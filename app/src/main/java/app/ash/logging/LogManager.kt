@@ -23,7 +23,7 @@ class LogManager @Inject constructor(
     val fileSink: FileLogSink by lazy {
         FileLogSink(
             dir = logDir,
-            header = "# ASH ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) ${BuildConfig.BUILD_TYPE} | " +
+            header = "# ashOS ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) ${BuildConfig.BUILD_TYPE} | " +
                 "${Build.MANUFACTURER} ${Build.MODEL} | Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})",
         )
     }

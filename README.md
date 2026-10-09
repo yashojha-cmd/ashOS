@@ -1,10 +1,10 @@
-# ASH
+# ashOS
 
-**You live. ASH remembers.**
+**You live. ashOS remembers.**
 
-ASH is a privacy-first, local-first life organizer for Android, built for Indian users and tuned for the Pixel 7. It turns the notifications you allow (bank SMS, UPI, Amazon, IRCTC, insurers, utilities) into structured records, keeps an encrypted document vault, and answers one question on the Home screen: *what needs my attention?*
+ashOS is a privacy-first, local-first life organizer for Android, built for Indian users and tuned for the Pixel 7. It turns the notifications you allow (bank SMS, UPI, Amazon, IRCTC, insurers, utilities) into structured records, keeps an encrypted document vault, and answers one question on the Home screen: *what needs my attention?*
 
-ASH has **no internet permission**. There is no cloud, no account, no analytics and no AI service. Everything is stored and processed on the phone.
+ashOS has **no internet permission**. There is no cloud, no account, no analytics and no AI service. Everything is stored and processed on the phone.
 
 ## Status
 
@@ -72,7 +72,7 @@ app.ash
 `AshNotificationListener` → source allow-list (opt-in per app) → OTP/password filter (never stored) → duplicate check → `RuleBasedIntelligenceEngine` → confidence bands:
 
 - **≥ 0.85**: the record is created automatically, with typed rows (transaction, bill, trip…) and reminders.
-- **0.50–0.85**: the record goes to **Review**. ASH shows "ASH found something that may be important. Please confirm." Financial rows are only created after confirmation.
+- **0.50–0.85**: the record goes to **Review**. ashOS shows "ashOS found something that may be important. Please confirm." Financial rows are only created after confirmation.
 - **< 0.50**: only the notification log is kept.
 
 ### Priority (Home)
@@ -103,7 +103,7 @@ Settings → Diagnostics → View logs, then Share to export a ZIP. Logs mask am
 ## Known limitations
 
 - The notification listener only sees notifications posted after access is granted; there is no history import.
-- Many banks send SMS only. ASH reads those through the Messages app notification, so Messages must be enabled as a source. ASH never requests `READ_SMS`.
+- Many banks send SMS only. ashOS reads those through the Messages app notification, so Messages must be enabled as a source. ashOS never requests `READ_SMS`.
 - Parsers are deterministic rules. New notification formats need a dictionary or regex update, plus a golden test case.
 - Camera scanning captures a photo without automatic edge detection or perspective correction (planned).
 - OCR quality depends on the image. Users always confirm the extracted fields.

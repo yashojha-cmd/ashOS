@@ -61,7 +61,7 @@ data class ParsedSignal(
 
 sealed interface ParseOutcome {
     data class Parsed(val signal: ParsedSignal) : ParseOutcome
-    /** OTPs, passwords and similar: ASH never stores these, not even the raw notification. */
+    /** OTPs, passwords and similar: ashOS never stores these, not even the raw notification. */
     data object Sensitive : ParseOutcome
     data object NoMatch : ParseOutcome
 }
@@ -91,6 +91,6 @@ class Evidence {
 object ConfidencePolicy {
     /** At or above: record is created automatically. */
     const val AUTO = 0.85f
-    /** Between REVIEW and AUTO: "ASH found something that may be important. Please confirm." */
+    /** Between REVIEW and AUTO: "ashOS found something that may be important. Please confirm." */
     const val REVIEW = 0.5f
 }

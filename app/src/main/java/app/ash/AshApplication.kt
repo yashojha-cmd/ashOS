@@ -40,7 +40,7 @@ class AshApplication : Application(), Configuration.Provider {
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectDiskWrites().detectNetwork().penaltyLog().build())
         }
-        AshLogger.i(TAG, "ASH ${BuildConfig.VERSION_NAME} starting")
+        AshLogger.i(TAG, "ashOS ${BuildConfig.VERSION_NAME} starting")
         NotificationChannels.create(this)
         appLock.start()
         scope.launch(Dispatchers.IO) {
