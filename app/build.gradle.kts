@@ -46,7 +46,7 @@ android {
         buildConfig = true
     }
     androidResources {
-        localeFilters += listOf("en", "hi")
+        localeFilters += listOf("en")
     }
     testOptions {
         unitTests {

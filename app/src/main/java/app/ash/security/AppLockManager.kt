@@ -48,7 +48,8 @@ class AppLockManager @Inject constructor(
 
     override fun onStart(owner: LifecycleOwner) {
         val since = backgroundedAt ?: return
-        if (lockEnabled && System.currentTimeMillis() - since >= timeoutMs) _locked.value = true
+        // A short grace period covers system screens ASH itself opens (PIN entry, file picker).
+        if (lockEnabled && System.currentTimeMillis() - since >= maxOf(timeoutMs, MIN_GRACE_MS)) _locked.value = true
     }
 
     fun unlock() {
@@ -69,5 +70,6 @@ class AppLockManager @Inject constructor(
 
     companion object {
         const val SENSITIVE_WINDOW_MS = 2 * 60 * 1000L
+        private const val MIN_GRACE_MS = 5_000L
     }
 }

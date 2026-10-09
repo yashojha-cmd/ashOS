@@ -13,7 +13,6 @@ import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.Group
-import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.MarkunreadMailbox
 import androidx.compose.material.icons.rounded.PrivacyTip
 import androidx.compose.material.icons.rounded.Save
@@ -142,14 +141,6 @@ fun SettingsScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                 GroupedSection(header = stringResource(R.string.settings_general)) {
                     AshRow(stringResource(R.string.profiles_title), icon = Icons.Rounded.Group, showChevron = true, onClick = { navigate(ProfilesRoute) })
                     OptionField(stringResource(R.string.settings_theme), ThemeMode.entries, s.themeMode, { themeLabel(it) }, vm::setTheme)
-                    AshRow(stringResource(R.string.settings_language), subtitle = stringResource(R.string.settings_language_desc), icon = Icons.Rounded.Language, showChevron = true, showDivider = false, onClick = {
-                        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:${context.packageName}"))
-                        } else {
-                            Intent(Settings.ACTION_LOCALE_SETTINGS)
-                        }
-                        context.startActivity(intent)
-                    })
                 }
             }
             item {

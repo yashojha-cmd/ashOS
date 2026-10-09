@@ -498,8 +498,6 @@
     <string name="settings_exact_desc">Off: reminders may arrive a few minutes late to save battery</string>
     <string name="settings_general">General</string>
     <string name="settings_theme">Appearance</string>
-    <string name="settings_language">Language</string>
-    <string name="settings_language_desc">English or हिन्दी</string>
     <string name="settings_data">Your data</string>
     <string name="theme_system">Match phone</string>
     <string name="theme_light">Light</string>

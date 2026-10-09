@@ -114,6 +114,10 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
         nav.navigate(HomeRoute) { popUpTo(0) { inclusive = true } }
     }
 
+    // Decided once; later changes (finishing onboarding, delete-all) navigate explicitly
+    // instead of rebuilding the whole graph underneath the user.
+    val startDestination: Any = androidx.compose.runtime.remember { if (startOnboarding) OnboardingRoute else HomeRoute }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
@@ -148,7 +152,7 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
         val bottom = PaddingValues(bottom = padding.calculateBottomPadding())
         NavHost(
             navController = nav,
-            startDestination = if (startOnboarding) OnboardingRoute else HomeRoute,
+            startDestination = startDestination,
             modifier = Modifier.padding(bottom).consumeWindowInsets(bottom),
             enterTransition = AshMotion.enter,
             exitTransition = AshMotion.exit,

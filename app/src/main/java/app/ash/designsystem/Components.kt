@@ -418,11 +418,23 @@ fun ConfirmDialog(
 @Composable
 fun SecureScreen(alwaysSecure: Boolean = false) {
     val context = LocalContext.current
-    DisposableEffect(Unit) {
+    DisposableEffect(alwaysSecure) {
         val window = (context as? Activity)?.window
+        // Reference-counted so one screen leaving never unblocks screenshots another still needs.
+        SecureFlag.holders++
         window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        onDispose { if (!alwaysSecure) window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+        onDispose {
+            SecureFlag.holders--
+            if (SecureFlag.holders <= 0) {
+                SecureFlag.holders = 0
+                window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            }
+        }
     }
+}
+
+private object SecureFlag {
+    var holders = 0
 }
 
 @Composable

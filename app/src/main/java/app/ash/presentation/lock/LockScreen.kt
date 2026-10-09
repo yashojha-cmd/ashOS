@@ -67,6 +67,8 @@ fun LockScreen(onUnlocked: () -> Unit, onUnavailable: () -> Unit) {
         }
     }
     LaunchedEffect(Unit) { authenticate() }
+    // Back must never reveal or drive the app hidden behind the lock.
+    androidx.activity.compose.BackHandler { activity.moveTaskToBack(true) }
 
     Box(
         Modifier
