@@ -77,6 +77,9 @@ class RecordDetailViewModel @Inject constructor(
     val state = records.observe(id).map { RecordDetailState(false, it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecordDetailState())
 
+    val isSalary = records.observeIsSalary(id).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    fun setSalary(value: Boolean) = viewModelScope.launch { records.setSalary(id, value) }
+
     fun confirm() = viewModelScope.launch { state.value.record?.let { records.confirm(it) } }
     fun setStatus(status: RecordStatus) = viewModelScope.launch { records.setStatus(id, status) }
     fun delete(onDone: () -> Unit) = viewModelScope.launch { records.delete(id); onDone() }
@@ -86,6 +89,7 @@ class RecordDetailViewModel @Inject constructor(
 fun RecordDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
     val vm: RecordDetailViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
+    val salaryFlag by vm.isSalary.collectAsStateWithLifecycle()
     val haptics = LocalHapticFeedback.current
     var confirmDelete by remember { mutableStateOf(false) }
     val record = state.record
@@ -167,6 +171,11 @@ fun RecordDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                     if (record.status == RecordStatus.HANDLED || record.status == RecordStatus.ARCHIVED) {
                         OutlinedButton(onClick = { vm.setStatus(RecordStatus.UNREAD) }, modifier = Modifier.height(52.dp).fillMaxWidth()) {
                             Text(stringResource(R.string.action_reopen))
+                        }
+                    }
+                    if (record.extras.direction == app.ash.domain.model.TxnDirection.INCOME && salaryFlag != null) {
+                        OutlinedButton(onClick = { vm.setSalary(salaryFlag != true) }, modifier = Modifier.height(52.dp).fillMaxWidth()) {
+                            Text(stringResource(if (salaryFlag == true) R.string.action_unmark_salary else R.string.action_mark_salary))
                         }
                     }
                     OutlinedButton(onClick = { navigate(ReminderEditRoute(title = record.title)) }, modifier = Modifier.height(52.dp).fillMaxWidth()) {

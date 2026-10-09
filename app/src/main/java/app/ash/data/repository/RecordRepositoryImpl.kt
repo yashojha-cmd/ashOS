@@ -102,13 +102,14 @@ class RecordRepositoryImpl @Inject constructor(
             direction = signal.direction, accountRef = signal.accountRef, deliveryState = signal.deliveryState,
             tripMode = signal.tripMode, tripFrom = signal.tripFrom, tripTo = signal.tripTo, recurrence = signal.recurrence,
             insuranceKind = signal.insuranceKind, vehicleReg = signal.vehicleReg, parserId = signal.parserId,
-            originalText = originalText,
+            originalText = originalText, salary = signal.salary.takeIf { it }, balancePaise = signal.balancePaise,
         )
 
         mergeIntoExisting(signal, status, now)?.let { return it to status }
+        if (auto) mergeCrossSourceTransaction(signal, sourcePackage, postedAt, now)?.let { return it to status }
 
         val record = Record(
-            type = signal.type, category = signal.category, title = signal.title,
+            type = signal.type, category = learnedCategory(signal), title = signal.title,
             // With "Keep original notification text" off, no notification wording is kept at all.
             summary = if (originalText == null) "" else signal.summary,
             merchant = signal.merchant, amountPaise = signal.amountPaise, dueAt = signal.dueAt, eventAt = signal.eventAt,
@@ -270,6 +271,7 @@ class RecordRepositoryImpl @Inject constructor(
         // Entities that live outside the record (policies, subscriptions, vehicles) and reminders.
         when (record.type) {
             RecordType.INSURANCE -> linkPolicy(record)
+            RecordType.TRANSACTION -> if (extras.direction == TxnDirection.EXPENSE) record.amountPaise?.let { linkBillPayment(record, it, now) }
             RecordType.SUBSCRIPTION -> linkSubscription(record, now)
             RecordType.VEHICLE -> linkVehicle(record)
             else -> Unit
@@ -289,8 +291,89 @@ class RecordRepositoryImpl @Inject constructor(
                 occurredAt = record.eventAt ?: record.createdAt.takeIf { it > 0 } ?: now,
                 vehicleId = existing?.vehicleId,
                 userCorrected = existing?.userCorrected ?: false,
+                // A user's own "Mark as salary" choice always wins over detection.
+                isSalary = if (existing?.userCorrected == true) existing.isSalary else existing?.isSalary == true || isSalary(record, amount, direction),
+                balanceAfterPaise = record.extras.balancePaise ?: existing?.balanceAfterPaise,
             ),
         )
+    }
+
+    /** Salary keyword in the SMS, or a credit from a payer the user already marked as salary (at least half the last amount). */
+    private suspend fun isSalary(record: Record, amount: Long, direction: TxnDirection): Boolean {
+        if (direction != TxnDirection.INCOME) return false
+        if (record.extras.salary == true) return true
+        val payer = record.merchant ?: return false
+        val last = transactions.lastSalaryAmountFrom(payer) ?: return false
+        return amount * 2 >= last
+    }
+
+    /**
+     * One payment often produces two messages: the bank SMS and the UPI app's notification.
+     * If a transaction with the same amount and direction arrived from another app within 15
+     * minutes, enrich that one instead of creating a second (so balances are not counted twice).
+     */
+    private suspend fun mergeCrossSourceTransaction(signal: ParsedSignal, sourcePackage: String, postedAt: Long, now: Long): Long? {
+        if (signal.type != RecordType.TRANSACTION) return null
+        val amount = signal.amountPaise ?: return null
+        val direction = signal.direction ?: return null
+        val window = 15L * 60 * 1000
+        val existingId = transactions.findCrossSourceDuplicate(amount, direction, postedAt - window, postedAt + window, sourcePackage) ?: return null
+        val record = records.getById(existingId) ?: return null
+        val txn = transactions.get(existingId) ?: return null
+        val betterMerchant = record.merchantName ?: signal.merchant
+        records.update(record.copy(merchantName = betterMerchant, title = if (record.merchantName == null && signal.merchant != null) signal.merchant else record.title, updatedAt = now))
+        transactions.upsert(
+            txn.copy(
+                accountRef = txn.accountRef ?: signal.accountRef,
+                merchantId = txn.merchantId ?: betterMerchant?.let { merchantId(it, Category.fromKey(record.categoryKey)) },
+                isSalary = txn.isSalary || signal.salary,
+                balanceAfterPaise = txn.balanceAfterPaise ?: signal.balancePaise,
+            ),
+        )
+        diagnostics.increment(Counters.DUPLICATES_MERGED)
+        AshLogger.i(TAG, "Merged duplicate ${direction.name} from $sourcePackage into record $existingId")
+        return existingId
+    }
+
+    /** Payments to a merchant the user has categorised before keep that category. */
+    private suspend fun learnedCategory(signal: ParsedSignal): Category {
+        if (signal.type != RecordType.TRANSACTION) return signal.category
+        val name = signal.merchant ?: return signal.category
+        val canonical = MerchantDictionary.canonical(name)?.name ?: name
+        return merchants.findByName(canonical)?.defaultCategoryKey?.let { Category.fromKey(it) } ?: signal.category
+    }
+
+    /**
+     * A payment that matches an open bill (same amount within ₹1, due between 30 days before and
+     * 15 days after the payment) marks that bill paid and stops its reminders. When several bills
+     * match, the one whose biller appears in the payment is preferred; ambiguous matches are left alone.
+     */
+    private suspend fun linkBillPayment(payment: Record, amount: Long, now: Long) {
+        val paidAt = payment.eventAt ?: payment.createdAt.takeIf { it > 0 } ?: now
+        val day = 24L * 60 * 60 * 1000
+        val candidates = bills.openBillsMatching(amount - 100, amount + 100, paidAt - 30 * day, paidAt + 15 * day, paidAt)
+        if (candidates.isEmpty()) return
+        val haystack = "${payment.merchant.orEmpty()} ${payment.title} ${payment.extras.originalText.orEmpty()}".lowercase()
+        val bill = candidates.firstOrNull { haystack.contains(it.biller.lowercase()) }
+            ?: candidates.singleOrNull()
+            ?: return
+        bills.markPaid(bill.recordId, paidAt)
+        records.updateStatus(bill.recordId, RecordStatus.HANDLED, now)
+        reminders.cancelForTarget(ReminderTarget.RECORD, bill.recordId)
+        diagnostics.increment(Counters.BILLS_AUTO_PAID)
+        AshLogger.i(TAG, "Payment ${payment.id} settled bill ${bill.recordId} (${bill.biller})")
+    }
+
+    override fun observeTransactionsSince(from: Long): Flow<List<TransactionItem>> =
+        transactions.observeSince(from).map { rows -> rows.map { it.toDomain() } }
+
+    override fun observeIsSalary(recordId: Long): Flow<Boolean?> = transactions.observeIsSalary(recordId)
+
+    override suspend fun setSalary(recordId: Long, isSalary: Boolean) {
+        val existing = transactions.get(recordId) ?: return
+        // Remember it as a user decision so detection never overrides it.
+        transactions.upsert(existing.copy(isSalary = isSalary, userCorrected = true))
+        diagnostics.audit(AuditAction.EDIT, "salary", recordId)
     }
 
     private suspend fun linkPolicy(record: Record) {
@@ -380,12 +463,16 @@ class RecordRepositoryImpl @Inject constructor(
         val record = records.getById(recordId) ?: return
         val existing = transactions.get(recordId)
         records.update(record.copy(amountPaise = amountPaise, merchantName = merchant, categoryKey = category.name, title = merchant ?: record.title, confidence = 1f, updatedAt = now))
+        // Learn: future payments to this merchant get the category the user chose.
+        merchant?.let { name -> merchants.setDefaultCategory(merchantId(name, category), category.name) }
         transactions.upsert(
             TransactionEntity(
                 recordId = recordId, amountPaise = amountPaise, direction = direction,
                 merchantId = merchant?.let { merchantId(it, category) }, accountRef = existing?.accountRef,
                 occurredAt = existing?.occurredAt ?: record.eventAt ?: record.createdAt, vehicleId = existing?.vehicleId,
                 userCorrected = true,
+                isSalary = existing?.isSalary ?: false,
+                balanceAfterPaise = existing?.balanceAfterPaise,
             ),
         )
         diagnostics.audit(AuditAction.EDIT, "transaction", recordId)

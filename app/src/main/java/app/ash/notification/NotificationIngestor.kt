@@ -51,7 +51,14 @@ class NotificationIngestor @Inject constructor(
         postedAt: Long,
         historical: Boolean = false,
     ): Result = mutex.withLock {
-        try {
+        val started = System.nanoTime()
+        ingestLocked(packageName, notificationKey, title, text, postedAt, historical).also { result ->
+            AshLogger.d(TAG, "Ingest $packageName -> $result in ${(System.nanoTime() - started) / 1_000_000} ms")
+        }
+    }
+
+    private suspend fun ingestLocked(packageName: String, notificationKey: String?, title: String, text: String, postedAt: Long, historical: Boolean): Result {
+        return try {
             val source = sources.recordSeen(packageName)
             if (!source.enabled) return Result.SOURCE_DISABLED
 

@@ -114,6 +114,8 @@ fun DiagnosticsScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                         R.string.diag_duplicates to Counters.NOTIFICATIONS_DUPLICATE,
                         R.string.diag_ocr to Counters.OCR_DOCUMENTS,
                         R.string.diag_reminders to Counters.REMINDERS_FIRED,
+                        R.string.diag_bills_auto to Counters.BILLS_AUTO_PAID,
+                        R.string.diag_merged to Counters.DUPLICATES_MERGED,
                         R.string.diag_errors to Counters.ERRORS,
                     ).forEach { (label, key) ->
                         AshRow(stringResource(label), trailing = { Text((counters[key] ?: 0).toString(), style = MaterialTheme.typography.titleSmall) })

@@ -26,6 +26,7 @@ class AshApplication : Application(), Configuration.Provider {
     @Inject lateinit var appLock: AppLockManager
     @Inject lateinit var vault: VaultStorage
     @Inject lateinit var settings: SettingsRepository
+    @Inject lateinit var workspaces: app.ash.workspace.WorkspaceManager
     @Inject @ApplicationScope lateinit var scope: CoroutineScope
 
     override val workManagerConfiguration: Configuration
@@ -40,7 +41,7 @@ class AshApplication : Application(), Configuration.Provider {
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectDiskWrites().detectNetwork().penaltyLog().build())
         }
-        AshLogger.i(TAG, "ashOS ${BuildConfig.VERSION_NAME} starting")
+        AshLogger.i(TAG, "ashOS ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE}) starting, workspace=${workspaces.active.id}")
         NotificationChannels.create(this)
         appLock.start()
         scope.launch(Dispatchers.IO) {

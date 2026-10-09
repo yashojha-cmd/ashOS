@@ -27,6 +27,8 @@ data class TransactionRow(
     val userCorrected: Boolean,
     val vehicleId: Long?,
     val sourceLabel: String?,
+    val isSalary: Boolean = false,
+    val balanceAfterPaise: Long? = null,
 )
 
 data class PaymentRow(val merchant: String, val amountPaise: Long, val occurredAt: Long)
@@ -53,7 +55,7 @@ interface TransactionDao {
 
     @Query(
         """SELECT t.recordId, t.amountPaise, t.direction, COALESCE(m.canonicalName, r.merchantName) AS merchant, t.accountRef,
-                  t.occurredAt, r.categoryKey, r.confidence, t.userCorrected, t.vehicleId, r.sourceLabel
+                  t.occurredAt, r.categoryKey, r.confidence, t.userCorrected, t.vehicleId, r.sourceLabel, t.isSalary, t.balanceAfterPaise
            FROM transactions t JOIN records r ON r.id = t.recordId LEFT JOIN merchants m ON m.id = t.merchantId
            WHERE r.deletedAt IS NULL ORDER BY t.occurredAt DESC LIMIT :limit""",
     )
@@ -61,7 +63,7 @@ interface TransactionDao {
 
     @Query(
         """SELECT t.recordId, t.amountPaise, t.direction, COALESCE(m.canonicalName, r.merchantName) AS merchant, t.accountRef,
-                  t.occurredAt, r.categoryKey, r.confidence, t.userCorrected, t.vehicleId, r.sourceLabel
+                  t.occurredAt, r.categoryKey, r.confidence, t.userCorrected, t.vehicleId, r.sourceLabel, t.isSalary, t.balanceAfterPaise
            FROM transactions t JOIN records r ON r.id = t.recordId LEFT JOIN merchants m ON m.id = t.merchantId
            WHERE r.deletedAt IS NULL AND t.vehicleId = :vehicleId ORDER BY t.occurredAt DESC""",
     )
@@ -80,6 +82,40 @@ interface TransactionDao {
            WHERE r.deletedAt IS NULL AND t.occurredAt >= :from AND t.occurredAt < :to GROUP BY t.direction""",
     )
     fun observeTotals(from: Long, to: Long): Flow<List<DirectionTotal>>
+
+    /** Every transaction from [from] onwards, oldest first: the raw material for statements. */
+    @Query(
+        """SELECT t.recordId, t.amountPaise, t.direction, COALESCE(m.canonicalName, r.merchantName) AS merchant, t.accountRef,
+                  t.occurredAt, r.categoryKey, r.confidence, t.userCorrected, t.vehicleId, r.sourceLabel, t.isSalary, t.balanceAfterPaise
+           FROM transactions t JOIN records r ON r.id = t.recordId LEFT JOIN merchants m ON m.id = t.merchantId
+           WHERE r.deletedAt IS NULL AND t.occurredAt >= :from ORDER BY t.occurredAt ASC, t.recordId ASC""",
+    )
+    fun observeSince(from: Long): Flow<List<TransactionRow>>
+
+    @Query("SELECT isSalary FROM transactions WHERE recordId = :recordId")
+    fun observeIsSalary(recordId: Long): Flow<Boolean?>
+
+    @Query("UPDATE transactions SET isSalary = :isSalary WHERE recordId = :recordId")
+    suspend fun setSalary(recordId: Long, isSalary: Boolean)
+
+    /** The most recent salary credit from this payer (case-insensitive), used to learn the employer. */
+    @Query(
+        """SELECT t.amountPaise FROM transactions t JOIN records r ON r.id = t.recordId LEFT JOIN merchants m ON m.id = t.merchantId
+           WHERE r.deletedAt IS NULL AND t.isSalary = 1 AND LOWER(COALESCE(m.canonicalName, r.merchantName, '')) = LOWER(:payer)
+           ORDER BY t.occurredAt DESC LIMIT 1""",
+    )
+    suspend fun lastSalaryAmountFrom(payer: String): Long?
+
+    /**
+     * A transaction with the same amount and direction that arrived within the window from a
+     * different app (e.g. the bank SMS and the GPay notification for one payment).
+     */
+    @Query(
+        """SELECT t.recordId FROM transactions t JOIN records r ON r.id = t.recordId
+           WHERE r.deletedAt IS NULL AND t.amountPaise = :amount AND t.direction = :direction
+           AND r.createdAt BETWEEN :from AND :to AND COALESCE(r.sourcePackage, '') != :sourcePackage LIMIT 1""",
+    )
+    suspend fun findCrossSourceDuplicate(amount: Long, direction: TxnDirection, from: Long, to: Long, sourcePackage: String): Long?
 }
 
 @Dao
@@ -95,6 +131,15 @@ interface BillDao {
            JOIN records r ON r.id = b.recordId WHERE r.deletedAt IS NULL ORDER BY b.paidAt IS NOT NULL, b.dueAt LIMIT :limit""",
     )
     fun observeAll(limit: Int): Flow<List<BillRow>>
+
+    /** Unpaid open bills with this amount, due around the payment date, nearest due date first. */
+    @Query(
+        """SELECT b.* FROM bills b JOIN records r ON r.id = b.recordId
+           WHERE r.deletedAt IS NULL AND b.paidAt IS NULL AND r.status NOT IN ('HANDLED','ARCHIVED')
+           AND b.amountPaise BETWEEN :min AND :max AND b.dueAt BETWEEN :from AND :to
+           ORDER BY ABS(b.dueAt - :near) LIMIT 5""",
+    )
+    suspend fun openBillsMatching(min: Long, max: Long, from: Long, to: Long, near: Long): List<BillEntity>
 
     @Query("UPDATE bills SET paidAt = :paidAt WHERE recordId = :recordId")
     suspend fun markPaid(recordId: Long, paidAt: Long?)
@@ -128,6 +173,9 @@ interface SubscriptionDao {
 interface MerchantDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(merchant: MerchantEntity): Long
+
+    @Query("UPDATE merchants SET defaultCategoryKey = :category WHERE id = :id")
+    suspend fun setDefaultCategory(id: Long, category: String)
 
     @Query("SELECT * FROM merchants WHERE LOWER(canonicalName) = LOWER(:name) LIMIT 1")
     suspend fun findByName(name: String): MerchantEntity?

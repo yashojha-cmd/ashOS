@@ -36,6 +36,10 @@ data class TransactionEntity(
     val occurredAt: Long,
     val vehicleId: Long? = null,
     val userCorrected: Boolean = false,
+    /** Starts a new monthly statement (salary credit). Added in schema v2. */
+    @androidx.room.ColumnInfo(defaultValue = "0") val isSalary: Boolean = false,
+    /** Account balance the bank reported in the same SMS ("Avl Bal"), if any. Added in schema v2. */
+    val balanceAfterPaise: Long? = null,
 )
 
 @Serializable

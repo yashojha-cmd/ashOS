@@ -20,12 +20,17 @@ import app.ash.domain.model.Vehicle
 import app.ash.domain.model.Warranty
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Inbox views. Routine payments are not inbox items (they live in the Balance tab); only
+ * transactions still waiting for review appear here.
+ */
 enum class InboxFilter(val statuses: List<RecordStatus>) {
-    ALL(listOf(RecordStatus.UNREAD, RecordStatus.REVIEW, RecordStatus.ACTION_REQUIRED, RecordStatus.HANDLED)),
+    /** Default: things that still need the user. */
+    NEEDS_YOU(listOf(RecordStatus.REVIEW, RecordStatus.ACTION_REQUIRED, RecordStatus.UNREAD)),
     REVIEW(listOf(RecordStatus.REVIEW)),
-    ACTION(listOf(RecordStatus.ACTION_REQUIRED, RecordStatus.UNREAD)),
     HANDLED(listOf(RecordStatus.HANDLED)),
     ARCHIVED(listOf(RecordStatus.ARCHIVED)),
+    ALL(listOf(RecordStatus.UNREAD, RecordStatus.REVIEW, RecordStatus.ACTION_REQUIRED, RecordStatus.HANDLED)),
 }
 
 data class MoneySummary(val incomePaise: Long, val expensePaise: Long, val refundPaise: Long)
@@ -46,6 +51,12 @@ interface RecordRepository {
     fun observeTransactions(limit: Int = 200): Flow<List<TransactionItem>>
     fun observeMonthSummary(from: Long, to: Long): Flow<MoneySummary>
     suspend fun correctTransaction(recordId: Long, amountPaise: Long, direction: TxnDirection, merchant: String?, category: Category)
+    /** All transactions from [from] onwards, oldest first (statements). */
+    fun observeTransactionsSince(from: Long): Flow<List<TransactionItem>>
+    /** User marks or unmarks a credit as salary; the payer is remembered for next month. */
+    suspend fun setSalary(recordId: Long, isSalary: Boolean)
+    /** Null when the record has no transaction row. */
+    fun observeIsSalary(recordId: Long): Flow<Boolean?>
     fun observeBills(limit: Int = 200): Flow<List<BillItem>>
     suspend fun setBillPaid(recordId: Long, paid: Boolean)
 }

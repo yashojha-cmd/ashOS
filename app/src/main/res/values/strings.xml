@@ -8,6 +8,45 @@
     <string name="tab_vault">Vault</string>
     <string name="tab_life">Life</string>
     <string name="tab_search">Search</string>
+    <string name="tab_balance">Balance</string>
+    <string name="statement_title">Statement</string>
+    <string name="statement_remaining">Remaining</string>
+    <string name="statement_of_salary">of %1$s salary</string>
+    <string name="statement_spent">Spent</string>
+    <string name="statement_received">Received</string>
+    <string name="statement_per_day">%1$s/day</string>
+    <string name="statement_where">Where it went</string>
+    <string name="statement_compared">Compared with last month</string>
+    <string name="statement_up">Up %1$d%% · %2$s → %3$s</string>
+    <string name="statement_down">Down %1$d%% · %2$s → %3$s</string>
+    <string name="statement_new_spend">New this month · %1$s</string>
+    <string name="statement_top_payees">Top payees</string>
+    <string name="diag_bills_auto">Bills marked paid from payments</string>
+    <string name="diag_merged">Duplicate payments merged</string>
+    <plurals name="statement_payments">
+        <item quantity="one">%d payment</item>
+        <item quantity="other">%d payments</item>
+    </plurals>
+    <string name="statement_lines">Transactions</string>
+    <string name="statement_bal">Bal %1$s</string>
+    <string name="statement_salary">Salary</string>
+    <string name="statement_salary_line">Salary · %1$s</string>
+    <string name="statement_not_counted">not counted</string>
+    <string name="statement_bank_says">Bank says %1$s</string>
+    <string name="statement_this_month">This month</string>
+    <string name="statement_since">Since %1$s</string>
+    <string name="statement_range">%1$s – %2$s</string>
+    <string name="statement_older">Older statement</string>
+    <string name="statement_newer">Newer statement</string>
+    <string name="statement_no_salary">No salary SMS found yet. When your salary arrives, a new statement starts with it as the opening balance. You can also open any credit and tap Mark as salary.</string>
+    <string name="statement_empty_body">Payments and credits from your bank and UPI apps appear here with a running balance.</string>
+    <string name="action_mark_salary">Mark as salary</string>
+    <string name="action_unmark_salary">Not a salary</string>
+    <string name="salary_marked">ashOS will treat credits from this payer as salary from now on.</string>
+    <plurals name="statement_days_left">
+        <item quantity="one">%d day left</item>
+        <item quantity="other">%d days left</item>
+    </plurals>
 
     <!-- Actions -->
     <string name="action_add">Add</string>
@@ -137,7 +176,7 @@
     <string name="empty_attention_body">You\'re all caught up.</string>
     <string name="empty_home_body">ashOS hasn\'t connected to your digital life yet. Turn on notification access or add a bill to begin.</string>
     <string name="empty_inbox_title">ashOS hasn\'t connected to your digital life yet.</string>
-    <string name="empty_inbox_body">Items from the apps you allow will appear here.</string>
+    <string name="empty_inbox_body">Nothing needs you right now. Payments are in the Balance tab; handled items are under Handled.</string>
     <string name="empty_vault_title">Your important documents will live here.</string>
     <string name="empty_vault_body">Add Aadhaar, PAN, licence, insurance and more. They are encrypted and never leave this phone.</string>
     <string name="empty_reminders_title">Nothing needs your attention.</string>
@@ -173,7 +212,11 @@
     <string name="inbox_title">Inbox</string>
     <string name="filter_all">All</string>
     <string name="filter_review">To review</string>
-    <string name="filter_action">Open</string>
+    <string name="filter_needs_you">Needs you</string>
+    <string name="group_today">Today</string>
+    <string name="group_yesterday">Yesterday</string>
+    <string name="group_this_week">Earlier this week</string>
+    <string name="group_earlier">Earlier</string>
     <string name="filter_handled">Handled</string>
     <string name="filter_archived">Archived</string>
     <string name="filter_all_categories">All categories</string>

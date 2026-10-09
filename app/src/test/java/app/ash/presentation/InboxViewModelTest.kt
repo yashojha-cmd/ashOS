@@ -57,6 +57,9 @@ class InboxViewModelTest {
         override suspend fun correctTransaction(recordId: Long, amountPaise: Long, direction: TxnDirection, merchant: String?, category: Category) = Unit
         override fun observeBills(limit: Int): Flow<List<BillItem>> = flowOf(emptyList())
         override suspend fun setBillPaid(recordId: Long, paid: Boolean) = Unit
+        override fun observeTransactionsSince(from: Long): Flow<List<TransactionItem>> = flowOf(emptyList())
+        override suspend fun setSalary(recordId: Long, isSalary: Boolean) = Unit
+        override fun observeIsSalary(recordId: Long): Flow<Boolean?> = flowOf(null)
     }
 
     @Test fun filtersAndActions() = runTest {
@@ -65,7 +68,8 @@ class InboxViewModelTest {
         vm.state.test {
             var s = awaitItem()
             while (s.loading) s = awaitItem()
-            assertThat(s.items.map { it.title }).containsExactly("BESCOM", "Swiggy", "Amazon")
+            // Default view is "Needs you": the handled delivery is not shown.
+            assertThat(s.items.map { it.title }).containsExactly("BESCOM", "Swiggy")
 
             vm.setFilter(InboxFilter.REVIEW)
             s = awaitItem()

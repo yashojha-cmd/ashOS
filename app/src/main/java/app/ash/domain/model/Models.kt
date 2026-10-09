@@ -49,6 +49,10 @@ data class RecordExtras(
     val vehicleReg: String? = null,
     val parserId: String? = null,
     val originalText: String? = null,
+    /** Parser saw a salary keyword ("NEFT-SALARY", "Sal Cr"). */
+    val salary: Boolean? = null,
+    /** "Avl Bal" reported in the same message. */
+    val balancePaise: Long? = null,
 )
 
 data class TransactionItem(
@@ -63,6 +67,8 @@ data class TransactionItem(
     val userCorrected: Boolean,
     val vehicleId: Long?,
     val sourceLabel: String?,
+    val isSalary: Boolean = false,
+    val balanceAfterPaise: Long? = null,
 )
 
 data class BillItem(

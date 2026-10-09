@@ -55,6 +55,8 @@ class ParserGoldenTest {
         val handled: Boolean? = null,
         val action: Boolean? = null,
         val sensitive: Boolean = false,
+        val salary: Boolean? = null,
+        val balance: Long? = null,
         val label: String = "Source",
     )
 
@@ -175,6 +177,26 @@ class ParserGoldenTest {
             "Your Aadhaar update request has been completed. Download e-Aadhaar from DigiLocker.",
             type = RecordType.GOVERNMENT, band = Band.REVIEW_OR_BETTER),
 
+
+        // ---- Salary and adaptive formats ----
+        Case("ICICI NEFT salary with Avl Bal", SourceKind.SMS, "ICICI Bank",
+            "Your A/c XX1234 is credited with INR 85,000.00 on 01-Oct-26. Info: NEFT-SALARY OCT26-ACME TECH. Avl Bal: INR 1,02,345.00",
+            type = RecordType.TRANSACTION, amountPaise = 8_500_000, direction = TxnDirection.INCOME, salary = true, balance = 10_234_500),
+        Case("HDFC 'SAL CR' with Avbl Bal", SourceKind.SMS, "HDFC Bank",
+            "Rs 62,000.00 credited to A/c XX9988 on 30-09-26 SAL CR ACME. Avbl Bal Rs 70,512.40",
+            type = RecordType.TRANSACTION, amountPaise = 6_200_000, direction = TxnDirection.INCOME, salary = true, balance = 7_051_240),
+        Case("Rs: colon format, trf to", SourceKind.SMS, "Bank",
+            "A/c *4321 Debited for Rs:500.00 on 09-10-26 trf to RAMESH STORES Refno 628312345678",
+            type = RecordType.TRANSACTION, amountPaise = 50_000, direction = TxnDirection.EXPENSE, salary = false),
+        Case("SBI 'debited by' without currency", SourceKind.SMS, "SBI",
+            "Your a/c no. XXXXX1234 is debited by 2500.00 on 08Oct26 and credited to a/c no. XXXXX5678 (UPI Ref no 628344455566)",
+            type = RecordType.TRANSACTION, amountPaise = 250_000, direction = TxnDirection.EXPENSE),
+        Case("ATM withdrawal", SourceKind.SMS, "HDFC Bank",
+            "Rs.5,000.00 withdrawn at ATM from A/c XX4321 on 07-10-26. Avl Bal Rs 45,000.00",
+            type = RecordType.TRANSACTION, amountPaise = 500_000, direction = TxnDirection.EXPENSE, merchant = "ATM cash", balance = 4_500_000),
+        Case("INR without space", SourceKind.SMS, "Axis Bank",
+            "INR500.00 debited from A/c XX1111 at AMAZON PAY on 06-10-26",
+            type = RecordType.TRANSACTION, amountPaise = 50_000, direction = TxnDirection.EXPENSE, merchant = "Amazon"),
         // ---- Noise ----
         Case("Chat message", SourceKind.OTHER, "Rahul", "Hey, are we meeting today?", band = Band.LOW),
     )
@@ -236,6 +258,8 @@ class ParserGoldenTest {
         c.recurrence?.let { assertWithMessage("recurrence").that(s.recurrence).isEqualTo(it) }
         c.handled?.let { assertWithMessage("handled").that(s.alreadyHandled).isEqualTo(it) }
         c.action?.let { assertWithMessage("action").that(s.actionRequired).isEqualTo(it) }
+        c.salary?.let { assertWithMessage("salary").that(s.salary).isEqualTo(it) }
+        c.balance?.let { assertWithMessage("balance").that(s.balancePaise).isEqualTo(it) }
     }
 
     private fun Long.toDate(): LocalDate = Instant.ofEpochMilli(this).atZone(zone).toLocalDate()

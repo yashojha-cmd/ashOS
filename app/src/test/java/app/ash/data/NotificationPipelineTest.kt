@@ -241,6 +241,57 @@ class NotificationPipelineTest {
         demoGraph.reminders.delete(demoReminder)
         assertThat(wm.getWorkInfosForUniqueWork("reminder-yash-$realReminder").get().single().state).isEqualTo(androidx.work.WorkInfo.State.ENQUEUED)
         demoDb.close()
+
+        // 19. One payment, two messages (UPI app notification + bank SMS): counted once.
+        val gpay = "com.google.android.apps.nbu.paisa.user"
+        sources.recordSeen(gpay)
+        sources.setEnabled(gpay, true)
+        val txnsBefore = records.observeTransactions(500).first().size
+        assertThat(post(gpay, "Payment successful", "You paid ₹420 to Chai Point")).isEqualTo(Result.CREATED)
+        val today = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yy").format(time.today())
+        assertThat(post(sms, "HDFC Bank", "Rs.420.00 debited from A/c XX4321 on $today to VPA chaipoint@ybl (UPI Ref No 628377788899)")).isEqualTo(Result.CREATED)
+        val afterMerge = records.observeTransactions(500).first()
+        assertThat(afterMerge.size).isEqualTo(txnsBefore + 1)
+        assertThat(afterMerge.first { it.amountPaise == 42_000L }.accountRef).isEqualTo("XX4321") // enriched from the SMS
+
+        // 20. Salary: keyword detection, then learning a payer the user marks as salary.
+        assertThat(post(sms, "SBI", "Your A/c X1234 has been credited with Rs 85,000.00 by NEFT-SALARY ACME TECH. Avl Bal Rs 1,02,000.00")).isEqualTo(Result.CREATED)
+        assertThat(records.observeTransactions(500).first().first { it.amountPaise == 8_500_000L }.isSalary).isTrue()
+        assertThat(post(sms, "SBI", "Rs 70,000.00 credited to your A/c XX1234 by NEFT from GLOBEX CORP", minutesAgo = 60L * 24 * 3)).isEqualTo(Result.CREATED)
+        val globex = records.observeTransactions(500).first().first { it.amountPaise == 7_000_000L }
+        assertThat(globex.isSalary).isFalse()
+        records.setSalary(globex.recordId, true)
+        assertThat(post(sms, "SBI", "Rs 71,500.00 credited to your A/c XX1234 by NEFT from GLOBEX CORP ref 99")).isEqualTo(Result.CREATED)
+        assertThat(records.observeTransactions(500).first().first { it.amountPaise == 7_150_000L }.isSalary).isTrue()
+
+        // 21. The statement opens with the latest salary and tracks the remaining balance.
+        val statement = app.ash.domain.usecase.StatementCalculator.compute(
+            records.observeTransactionsSince(0).first(), 0, time.nowMillis(), time.zone(),
+        )
+        assertThat(statement.salary!!.amountPaise).isEqualTo(7_150_000)
+        assertThat(statement.opening).isEqualTo(7_150_000)
+        assertThat(statement.remaining).isEqualTo(statement.opening - statement.spent + statement.received)
+
+        // 22. A payment that matches an open bill marks it paid and stops its reminders.
+        assertThat(post(sms, "Tata Play", "Tata Play DTH bill of Rs 349.00 is due on 25-10-2026. Pay now.")).isEqualTo(Result.CREATED)
+        val dth = records.observeBills(50).first().first { it.amountPaise == 34_900L }
+        assertThat(dth.paidAt).isNull()
+        assertThat(post(sms, "HDFC Bank", "Rs.349.00 debited from A/c XX4321 on $today to Tata Play DTH (UPI Ref No 628300099988)")).isEqualTo(Result.CREATED)
+        val settled = records.observeBills(50).first().first { it.recordId == dth.recordId }
+        assertThat(settled.paidAt).isNotNull()
+        assertThat(settled.status).isEqualTo(RecordStatus.HANDLED)
+        assertThat(db.reminderDao().forTarget(app.ash.domain.model.ReminderTarget.RECORD, dth.recordId)).isEmpty()
+
+        // 23. Correcting a merchant's category teaches ashOS for next time.
+        assertThat(post(sms, "HDFC Bank", "Rs.180.00 debited from A/c XX4321 on $today to VPA sharmadairy@okicici (UPI Ref No 628311122233)")).isEqualTo(Result.CREATED)
+        val dairy = records.observeTransactions(500).first().first { it.amountPaise == 18_000L }
+        records.correctTransaction(dairy.recordId, 18_000, TxnDirection.EXPENSE, dairy.merchant, app.ash.domain.model.Category.HOME)
+        assertThat(post(sms, "HDFC Bank", "Rs.220.00 debited from A/c XX4321 on $today to VPA sharmadairy@okicici (UPI Ref No 628311199999)", minutesAgo = 30)).isEqualTo(Result.CREATED)
+        assertThat(records.observeTransactions(500).first().first { it.amountPaise == 22_000L }.category).isEqualTo(app.ash.domain.model.Category.HOME)
+
+        // 24. Routine payments are not inbox items; open bills still are.
+        val needsYou = records.observeInbox(InboxFilter.NEEDS_YOU, null).first()
+        assertThat(needsYou.none { it.type == RecordType.TRANSACTION && it.status != RecordStatus.REVIEW }).isTrue()
     }
 
     private object EmptyDocuments : DocumentRepository {

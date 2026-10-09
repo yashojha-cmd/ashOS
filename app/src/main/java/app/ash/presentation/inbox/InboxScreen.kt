@@ -72,7 +72,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class InboxUiState(
-    val filter: InboxFilter = InboxFilter.ALL,
+    val filter: InboxFilter = InboxFilter.NEEDS_YOU,
     val category: Category? = null,
     val items: List<Record> = emptyList(),
     val loading: Boolean = true,
@@ -81,7 +81,7 @@ data class InboxUiState(
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class InboxViewModel @Inject constructor(private val records: RecordRepository) : ViewModel() {
-    private val filter = MutableStateFlow(InboxFilter.ALL)
+    private val filter = MutableStateFlow(InboxFilter.NEEDS_YOU)
     private val category = MutableStateFlow<Category?>(null)
 
     val state = combine(filter, category) { f, c -> f to c }
@@ -134,15 +134,26 @@ fun InboxScreen(navigate: (Any) -> Unit) {
             if (!state.loading && state.items.isEmpty()) {
                 item { EmptyState(Icons.Rounded.Inbox, stringResource(R.string.empty_inbox_title), stringResource(R.string.empty_inbox_body)) }
             }
-            items(state.items, key = { it.id }) { record ->
-                InboxRow(
-                    record = record,
-                    onClick = { navigate(RecordRoute(record.id)) },
-                    onHandle = { vm.handle(record) },
-                    onArchive = { vm.archive(record) },
-                    onConfirm = { vm.confirm(record) },
-                    modifier = Modifier.animateItem(),
-                )
+            // Grouped by when it arrived, so the list reads like a timeline instead of a dump.
+            dayGroups(state.items).forEach { (group, records) ->
+                stickyHeader(key = "g-$group") {
+                    Text(
+                        stringResource(group.label),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(start = 24.dp, top = 12.dp, bottom = 4.dp),
+                    )
+                }
+                items(records, key = { it.id }) { record ->
+                    InboxRow(
+                        record = record,
+                        onClick = { navigate(RecordRoute(record.id)) },
+                        onHandle = { vm.handle(record) },
+                        onArchive = { vm.archive(record) },
+                        onConfirm = { vm.confirm(record) },
+                        modifier = Modifier.animateItem(),
+                    )
+                }
             }
         }
     }
@@ -153,7 +164,7 @@ private fun filterLabel(f: InboxFilter): String = stringResource(
     when (f) {
         InboxFilter.ALL -> R.string.filter_all
         InboxFilter.REVIEW -> R.string.filter_review
-        InboxFilter.ACTION -> R.string.filter_action
+        InboxFilter.NEEDS_YOU -> R.string.filter_needs_you
         InboxFilter.HANDLED -> R.string.filter_handled
         InboxFilter.ARCHIVED -> R.string.filter_archived
     },
@@ -228,3 +239,19 @@ private fun InboxRow(
         }
     }
 }
+
+internal enum class DayGroup(val label: Int) {
+    TODAY(R.string.group_today), YESTERDAY(R.string.group_yesterday), THIS_WEEK(R.string.group_this_week), EARLIER(R.string.group_earlier)
+}
+
+/** Splits newest-first records into Today / Yesterday / This week / Earlier, keeping order. */
+internal fun dayGroups(records: List<Record>, today: java.time.LocalDate = java.time.LocalDate.now(), zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): List<Pair<DayGroup, List<Record>>> =
+    records.groupBy { r ->
+        val days = java.time.temporal.ChronoUnit.DAYS.between(app.ash.common.Dates.toLocalDate(r.createdAt, zone), today)
+        when {
+            days <= 0 -> DayGroup.TODAY
+            days == 1L -> DayGroup.YESTERDAY
+            days < 7 -> DayGroup.THIS_WEEK
+            else -> DayGroup.EARLIER
+        }
+    }.toList().sortedBy { it.first.ordinal }

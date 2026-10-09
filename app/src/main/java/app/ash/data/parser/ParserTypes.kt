@@ -57,6 +57,10 @@ data class ParsedSignal(
     val vehicleReg: String? = null,
     val actionRequired: Boolean = false,
     val alreadyHandled: Boolean = false,
+    /** A salary credit: starts a new monthly statement. */
+    val salary: Boolean = false,
+    /** Account balance the bank quoted in the same message ("Avl Bal"). */
+    val balancePaise: Long? = null,
 )
 
 sealed interface ParseOutcome {

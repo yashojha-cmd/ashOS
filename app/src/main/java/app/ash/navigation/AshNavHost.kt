@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -118,6 +119,7 @@ private data class Tab(val route: Any, val icon: ImageVector, val label: Int)
 private val tabs = listOf(
     Tab(HomeRoute, AshIcons.Home, R.string.tab_home),
     Tab(InboxRoute, AshIcons.Inbox, R.string.tab_inbox),
+    Tab(BalanceRoute, androidx.compose.material.icons.Icons.Rounded.AccountBalanceWallet, R.string.tab_balance),
     Tab(VaultRoute, AshIcons.Vault, R.string.tab_vault),
     Tab(LifeRoute, AshIcons.Life, R.string.tab_life),
     Tab(SearchRoute, AshIcons.Search, R.string.tab_search),
@@ -126,6 +128,14 @@ private val tabs = listOf(
 @Composable
 private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewCount: Int) {
     val backStack by nav.currentBackStackEntryAsState()
+    // Screen names only (never content), so a problem can be retraced from the log.
+    androidx.compose.runtime.DisposableEffect(nav) {
+        val listener = androidx.navigation.NavController.OnDestinationChangedListener { _, destination, _ ->
+            app.ash.logging.AshLogger.d("Nav", "Screen ${destination.route?.substringBefore("/")?.substringBefore("?")?.substringAfterLast(".")}")
+        }
+        nav.addOnDestinationChangedListener(listener)
+        onDispose { nav.removeOnDestinationChangedListener(listener) }
+    }
     val destination = backStack?.destination
     val onTab = tabs.any { tab -> destination?.hasRoute(tab.route::class) == true }
     val navigate: (Any) -> Unit = { route -> nav.navigate(route) { launchSingleTop = true } }
@@ -198,6 +208,7 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
             composable<VaultRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { VaultScreen(navigate) }
             composable<LifeRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { LifeScreen(navigate) }
             composable<SearchRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { SearchScreen(navigate) }
+            composable<BalanceRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { app.ash.presentation.statement.StatementScreen(navigate) }
 
             composable<RecordRoute> { RecordDetailScreen(onBack = back, navigate = navigate) }
             composable<RecordEditRoute> { RecordEditScreen(onBack = back) }

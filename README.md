@@ -23,6 +23,26 @@ Each account is a separate data space with its own SQLCipher database, its own d
 
 Android keeps no notification history for apps, so earlier notifications cannot be recovered. Android does keep SMS: Settings → Account → **Import past SMS** asks for `READ_SMS` and reads the last 90 days of the inbox. Only business senders (DLT headers like `VM-HDFCBK`, or short codes) are read; messages from personal numbers are skipped without being parsed. Imported items keep their original dates, past deadlines are filed as handled, and uncertain matches are only logged. On Google Play, `READ_SMS` requires a permissions declaration (the "SMS-based money management" use case).
 
+## Balance tab (statements)
+
+A salary-to-salary statement built from your bank and UPI messages:
+
+- **Salary starts a cycle.** A credit with a salary marker ("NEFT-SALARY", "Salary credited", "SAL CR", "Payroll", "Stipend") opens a new statement, and its amount is the opening balance. If your salary SMS has no marker, open the credit and tap **Mark as salary**; ashOS remembers the payer and recognises next month's credit (at least half the last amount).
+- **Running balance.** Every payment subtracts and every credit or refund adds, newest first, with the balance after each line. Self-transfers are listed but not counted.
+- **Insights.** Remaining amount, spent and received, days until the next expected salary (median gap between salaries) with a safe amount per day, where the money went by category, top payees, and the biggest category changes against the previous cycle. When an SMS quotes the bank's own "Avl Bal", it is shown as a cross-check.
+- **History.** Arrows step through earlier cycles. Before any salary is known, the statement covers the current month.
+
+## How ashOS structures what it reads
+
+ashOS does not dump every message into a list. It links and files what it captures:
+
+- **One payment, one entry.** The bank SMS and the UPI app notification for the same payment (same amount and direction, from two apps, within 15 minutes) are merged into one transaction and enriched with details from both.
+- **Bills settle themselves.** A payment that matches an open bill (amount within ₹1, due 30 days before to 15 days after the payment, biller name preferred) marks the bill paid and cancels its reminders.
+- **Updates merge.** Delivery updates with the same order ID and trip updates with the same PNR update one record instead of creating new ones.
+- **It learns your categories.** Correct a merchant's category once; future payments to that merchant use it.
+- **Inbox shows what needs you.** Routine payments live in Balance, not the Inbox. The Inbox opens on *Needs you* (review, action required, new) and groups items by Today, Yesterday, Earlier this week and Earlier.
+- **History is filed, not flagged.** Imported SMS keep their original dates; past deadlines are filed as handled; uncertain old messages are only logged.
+
 ## Where your data lives
 
 Everything is in the app's private storage on the phone. Android blocks other apps from reading it, and cloud backup is disabled.
@@ -44,7 +64,8 @@ Requirements: the Android SDK (compileSdk 37.2) and a JDK 17+ (the JDK bundled w
 
 ```bash
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest      # 57 unit, Robolectric and Compose tests
+./gradlew testDebugUnitTest      # 68 unit, Robolectric and Compose tests
+./gradlew assembleStaging        # R8-optimised build signed with the debug key, for testing on a phone
 ./gradlew assembleRelease        # R8-minified, unsigned
 ```
 
@@ -101,17 +122,23 @@ app.ash
 
 Settings → Diagnostics → View logs, then Share to export a ZIP. Logs mask amounts, account, PAN, Aadhaar and vehicle numbers. "Detailed parser logs" records raw notification text for 24 hours to debug parser misses, then switches itself off.
 
+Debug and staging builds also mirror the log to logcat (`LOGCAT_MIRROR`), so a connected phone can be read with `adb logcat -s ashOS`. Release builds keep logs in the app only. Logged: startup (version, build type, account), each screen opened (name only), notification parse results with timing, OCR timing, SMS import totals, duplicate merges, bills settled by payments, and maintenance results.
+
+Before installing a new build on the test phone: read the device log and frame stats (`adb shell dumpsys gfxinfo app.ash.android.staging`), review and fix what they show, and install only after the owner confirms.
+
 ## Tests
 
 | Suite | Covers |
 |---|---|
-| `ParserGoldenTest` | 37 real-world notification formats: HDFC, SBI, ICICI, Axis, Hinglish, GPay, PhonePe, Paytm, Amazon, Flipkart, Swiggy, Zomato, Delhivery, IRCTC, IndiGo, redBus, ACKO, LIC, Star Health, BESCOM, Airtel, Jio, credit cards, Netflix, YouTube, Spotify, PUC, e-challan, EPFO, UIDAI, OTPs, promos |
+| `ParserGoldenTest` | 43 real-world notification formats (incl. salary credits, Rs:500, INR500, "debited by", ATM, Avl/Avbl Bal): HDFC, SBI, ICICI, Axis, Hinglish, GPay, PhonePe, Paytm, Amazon, Flipkart, Swiggy, Zomato, Delhivery, IRCTC, IndiGo, redBus, ACKO, LIC, Star Health, BESCOM, Airtel, Jio, credit cards, Netflix, YouTube, Spotify, PUC, e-challan, EPFO, UIDAI, OTPs, promos |
 | `ExtractorTest` | amounts, Indian date formats, references, merchants |
 | `IntelligenceTest` | priority scoring, search queries, subscription detection, OCR fields, reminder planning |
 | `CommonTest` | money formatting, log redaction, backup encryption (round trip, wrong password, tampering) |
-| `NotificationPipelineTest` | end to end with a real Room database: allow-list, OTP skip, duplicates, bills and reminders, delivery merging, review/confirm, search, Home feed |
+| `NotificationPipelineTest` | end to end with a real Room database: allow-list, OTP skip, duplicates, bills and reminders, delivery merging, review/confirm, search, Home feed, SMS history import, workspace isolation, cross-app payment merge, salary detection and learning, bill settled by payment, category learning, inbox filtering |
+| `StatementCalculatorTest` | salary cycles, running balance, reset on new salary, previous cycles, expected salary and daily budget, insights |
+| `MigrationTest` | real v1 database upgraded to v2 without losing transactions |
 | `DatabaseTest` | seeding, FTS sync, soft delete and purge, tags |
-| `ManifestSecurityTest` | no network/SMS/location permissions, backup off, only expected exported components |
+| `ManifestSecurityTest` | no network, SMS send/receive or location permissions (READ_SMS is opt-in), backup off, only expected exported components |
 | `UiTest`, `InboxViewModelTest` | accessibility semantics, ViewModel filtering and actions |
 
 ## Known limitations

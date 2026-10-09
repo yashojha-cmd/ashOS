@@ -29,8 +29,9 @@ class LogManager @Inject constructor(
     }
 
     fun initialise() {
-        if (BuildConfig.DEBUG) AshLogger.install(fileSink, LogcatSink()) else AshLogger.install(fileSink)
-        AshLogger.minLevel = if (BuildConfig.DEBUG) AshLogger.Level.DEBUG else AshLogger.Level.INFO
+        // Release: file only. Debug and staging also mirror to logcat (readable over adb).
+        if (BuildConfig.LOGCAT_MIRROR) AshLogger.install(fileSink, LogcatSink()) else AshLogger.install(fileSink)
+        AshLogger.minLevel = if (BuildConfig.LOGCAT_MIRROR) AshLogger.Level.DEBUG else AshLogger.Level.INFO
         CrashHandler.install(fileSink)
     }
 

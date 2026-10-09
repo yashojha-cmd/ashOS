@@ -22,6 +22,8 @@ object Counters {
     const val OCR_DOCUMENTS = "ocr_documents"
     const val ERRORS = "errors"
     const val REMINDERS_FIRED = "reminders_fired"
+    const val BILLS_AUTO_PAID = "bills_auto_paid"
+    const val DUPLICATES_MERGED = "transactions_merged"
 }
 
 data class StoredCounts(

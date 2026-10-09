@@ -89,7 +89,9 @@ class DocumentRepositoryImpl @Inject constructor(
             runCatching { vault.storeBytes(ImageTools.toJpeg(ImageTools.scaleToMax(bitmap, 360), 75), VaultStorage.thumbName(stored.fileName)) }
                 .onFailure { AshLogger.w(TAG, "Thumbnail failed", it) }
         }
+        val ocrStarted = System.nanoTime()
         val text = page?.let { recognise(it) }.orEmpty()
+        AshLogger.d(TAG, "OCR read ${text.length} chars in ${(System.nanoTime() - ocrStarted) / 1_000_000} ms")
         val fields = engine.extractDocumentFields(text, ParseContext(time.today(), time.zone(), now))
         val entity = DocumentEntity(
             title = fields.title ?: fallbackTitle,

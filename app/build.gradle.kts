@@ -24,6 +24,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Sample data tools exist in debug and staging builds only.
         buildConfigField("boolean", "DEMO_DATA", "true")
+        // Mirror ashOS logs to logcat so they can be read over adb (debug and staging only).
+        buildConfigField("boolean", "LOGCAT_MIRROR", "true")
     }
 
     buildTypes {
@@ -32,6 +34,7 @@ android {
         }
         release {
             buildConfigField("boolean", "DEMO_DATA", "false")
+            buildConfigField("boolean", "LOGCAT_MIRROR", "false")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -46,6 +49,7 @@ android {
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
             buildConfigField("boolean", "DEMO_DATA", "true")
+            buildConfigField("boolean", "LOGCAT_MIRROR", "true")
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
         }
@@ -73,6 +77,9 @@ android {
         }
     }
 }
+
+// Room schema history for MigrationTestHelper (Robolectric reads the debug variant's assets). Debug only.
+android.sourceSets.getByName("debug").assets.srcDir("$projectDir/schemas")
 
 room {
     schemaDirectory("$projectDir/schemas")

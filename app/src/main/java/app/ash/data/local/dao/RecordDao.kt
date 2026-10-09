@@ -30,11 +30,15 @@ interface RecordDao {
     )
     fun observeForAttention(handledSince: Long): Flow<List<RecordEntity>>
 
-    @Query("SELECT * FROM records WHERE deletedAt IS NULL AND status IN (:statuses) ORDER BY createdAt DESC LIMIT :limit")
+    @Query(
+        """SELECT * FROM records WHERE deletedAt IS NULL AND status IN (:statuses)
+           AND (type != 'TRANSACTION' OR status = 'REVIEW') ORDER BY createdAt DESC LIMIT :limit""",
+    )
     fun observeByStatus(statuses: List<RecordStatus>, limit: Int): Flow<List<RecordEntity>>
 
     @Query(
         """SELECT * FROM records WHERE deletedAt IS NULL AND status IN (:statuses) AND categoryKey = :category
+           AND (type != 'TRANSACTION' OR status = 'REVIEW')
            ORDER BY createdAt DESC LIMIT :limit""",
     )
     fun observeByStatusAndCategory(statuses: List<RecordStatus>, category: String, limit: Int): Flow<List<RecordEntity>>

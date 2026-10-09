@@ -59,6 +59,7 @@ fun TransactionRow.toDomain() = TransactionItem(
     recordId = recordId, amountPaise = amountPaise, direction = direction, merchant = merchant, accountRef = accountRef,
     occurredAt = occurredAt, category = Category.fromKey(categoryKey), confidence = confidence,
     userCorrected = userCorrected, vehicleId = vehicleId, sourceLabel = sourceLabel,
+    isSalary = isSalary, balanceAfterPaise = balanceAfterPaise,
 )
 
 fun BillRow.toDomain() = BillItem(recordId, biller, amountPaise, dueAt, paidAt, recurrence, status)

@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object VaultRoute
 @Serializable data object LifeRoute
 @Serializable data object SearchRoute
+@Serializable data object BalanceRoute
 
 @Serializable data class RecordRoute(val id: Long)
 @Serializable data class RecordEditRoute(val id: Long = 0, val type: String = "BILL")

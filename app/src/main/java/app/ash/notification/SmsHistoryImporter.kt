@@ -40,6 +40,7 @@ class SmsHistoryImporter @Inject constructor(
 
     suspend fun import(days: Int = DEFAULT_DAYS, onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }): Result = withContext(io) {
         check(hasPermission()) { "READ_SMS not granted" }
+        val started = System.nanoTime()
         val since = time.nowMillis() - days * DAY
         val graph = graphs.real
         // SMS share the Messages source, so the allow-list and duplicate checks line up with live SMS notifications.
@@ -75,7 +76,7 @@ class SmsHistoryImporter @Inject constructor(
         }
         onProgress(messages.size, messages.size)
         graph.life.detectSubscriptions()
-        AshLogger.i(TAG, "SMS import: scanned=${messages.size} business=$business created=$created personalSkipped=$personal days=$days")
+        AshLogger.i(TAG, "SMS import: scanned=${messages.size} business=$business created=$created personalSkipped=$personal days=$days in ${(System.nanoTime() - started) / 1_000_000} ms")
         Result(messages.size, business, created, personal)
     }
 

@@ -114,12 +114,18 @@ class DemoDataSeeder @Inject constructor(
         val notifications = listOf(
             // Money
             N(pkgSms, "HDFC Bank", "Rs.1,499.00 debited from A/c XX4321 on ${short(0)} to VPA swiggy@icici (UPI Ref No 628312345678). Not you? Call 18002586161", minutesAgo = 40),
-            N(pkgSms, "SBI", "Dear Customer, your A/c X1234 has been credited with Rs 85,000.00 on ${short(-2)} by NEFT from ACME TECHNOLOGIES PVT LTD. Avl Bal Rs 1,42,345.50", daysAgo = 2),
+            // Salary: last month and this month (each starts a new statement).
+            N(pkgSms, "SBI", "Dear Customer, your A/c X1234 has been credited with Rs 85,000.00 on ${short(-32)} by NEFT-SALARY ACME TECHNOLOGIES PVT LTD. Avl Bal Rs 96,120.00", daysAgo = 32),
+            N(pkgSms, "HDFC Bank", "Rs.12,500.00 debited from A/c XX4321 on ${short(-28)} to VPA landlord@okhdfc (UPI Ref No 628300011122). Avl Bal Rs 83,620.00", daysAgo = 28),
+            N(pkgSms, "HDFC Bank", "Rs.3,240.00 spent on HDFC Bank Card XX4321 at DMART on ${short(-18)}. Avl Bal Rs 80,380.00", daysAgo = 18),
+            N(pkgSms, "SBI", "Dear Customer, your A/c X1234 has been credited with Rs 85,000.00 on ${short(-2)} by NEFT-SALARY ACME TECHNOLOGIES PVT LTD. Avl Bal Rs 1,42,345.50", daysAgo = 2),
             N(pkgSms, "ICICI Bank", "INR 649.00 spent on ICICI Bank Card XX9876 on ${short(-65)} at NETFLIX.COM. Avl Lmt: INR 1,20,000.00", daysAgo = 65),
             N(pkgSms, "ICICI Bank", "INR 649.00 spent on ICICI Bank Card XX9876 on ${short(-35)} at NETFLIX.COM. Avl Lmt: INR 1,19,351.00", daysAgo = 35),
             N(pkgSms, "ICICI Bank", "INR 649.00 spent on ICICI Bank Card XX9876 on ${short(-5)} at NETFLIX.COM. Avl Lmt: INR 1,18,702.00", daysAgo = 5),
             N(pkgSms, "Axis Bank", "Refund of Rs 799.00 credited to your Axis Bank A/c XX5555 from AMAZON on ${short(-1)}", daysAgo = 1),
+            // One payment, two messages (UPI app + bank SMS): ashOS merges them into one entry.
             N(pkgGpay, "Payment successful", "You paid ₹250 to Raju Kirana", minutesAgo = 90),
+            N(pkgSms, "HDFC Bank", "Rs.250.00 debited from A/c XX4321 on ${short(0)} to VPA rajukirana@okaxis (UPI Ref No 628355544433). Avl Bal Rs 1,38,346.50", minutesAgo = 89),
             N(pkgPhonePe, "Money received", "Received ₹500 from Amit Sharma", daysAgo = 1),
             N(pkgSms, "HDFC Bank", "Rs.2,350.00 debited from A/c XX4321 on ${short(-3)} at INDIAN OIL PETROL PUMP. UPI Ref 628399912345", daysAgo = 3),
             // Bills

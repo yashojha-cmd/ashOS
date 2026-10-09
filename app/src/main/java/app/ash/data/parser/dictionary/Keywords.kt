@@ -8,6 +8,9 @@ object Keywords {
     val PROMO = Regex(
         """(?i)(\boffer\b|cashback up to|upto \d+% off|\d+% off|discount|\bsale\b|\bwin\b|congratulations|pre-?approved|eligible for|apply now|limited time|use code|coupon|lowest price|\bdeal\b|hurry|exclusive)""",
     )
+    /** Salary credits: "NEFT-SALARY", "Salary credited", "SAL CR", "Payroll", "Stipend". */
+    val SALARY = Regex("""(?i)(\bsalary\b|\bsal\b|\bsal\s*cr|\bsalcr\b|\bsal\s*credit|payroll|\bwages\b|stipend|neft-?sal|\bsal-|\bsal for\b)""")
+    val ATM = Regex("""(?i)\b(atm|cash withdrawal|cash wdl|atw)\b""")
     val FUTURE_DEBIT = Regex("""(?i)(will be debited|will be deducted|to be debited|scheduled to be|is due|due on|due date|payment due)""")
 
     val REFUND = Regex("""(?i)\b(refund(?:ed)?|reversed|reversal|cashback (?:of|credited))\b""")

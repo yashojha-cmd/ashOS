@@ -42,14 +42,23 @@ class BankParser : NotificationParser {
             .add(-0.4f, "promo", Keywords.PROMO.containsMatchIn(text))
             .add(-0.2f, "non-bank-source", n.sourceKind in setOf(SourceKind.SHOPPING, SourceKind.FOOD, SourceKind.OTT, SourceKind.TRAVEL))
 
-        val merchant = MerchantExtractor.extract(text, direction)
+        val salary = direction == TxnDirection.INCOME && Keywords.SALARY.containsMatchIn(text)
+        val atm = direction == TxnDirection.EXPENSE && Keywords.ATM.containsMatchIn(text)
+        val merchant = when {
+            atm -> "ATM cash"
+            else -> MerchantExtractor.extract(text, direction)
+        }
         val category = MerchantDictionary.categoryOf(merchant) ?: Category.FINANCE
-        val occurred = DateExtractor.first(text, ctx, preferFuture = false)?.toEventMillis(ctx) ?: n.postedAt
+        // Banks give the day; the notification gives the exact time. Prefer the exact time on the same day.
+        val parsedDay = DateExtractor.first(text, ctx, preferFuture = false)
+        val postedDay = app.ash.common.Dates.toLocalDate(n.postedAt, ctx.zone)
+        val occurred = if (parsedDay == null || parsedDay == postedDay) n.postedAt else parsedDay.toEventMillis(ctx)
+        evidence.add(0.05f, "salary", salary)
         return ParsedSignal(
             parserId = id,
             type = RecordType.TRANSACTION,
             category = category,
-            title = merchant ?: n.senderName(),
+            title = if (salary) merchant ?: "Salary" else merchant ?: n.senderName(),
             summary = n.shortSummary(),
             confidence = evidence.value,
             amountPaise = amount,
@@ -60,6 +69,8 @@ class BankParser : NotificationParser {
             reference = ReferenceExtractor.upiRef(text),
             importance = Importance.LOW,
             alreadyHandled = true,
+            salary = salary,
+            balancePaise = AmountExtractor.balance(text),
         )
     }
 
