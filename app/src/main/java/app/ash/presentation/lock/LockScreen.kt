@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LockScreen(onUnlocked: () -> Unit, onUnavailable: () -> Unit) {
     SecureScreen()
-    val activity = LocalContext.current as FragmentActivity
+    val activity = androidx.activity.compose.LocalActivity.current as FragmentActivity
     val scope = rememberCoroutineScope()
     var message by remember { mutableStateOf<String?>(null) }
     val title = stringResource(R.string.lock_prompt_title)

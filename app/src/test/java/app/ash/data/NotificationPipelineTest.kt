@@ -232,8 +232,10 @@ class NotificationPipelineTest {
         assertThat(realGraph.ingestor.ingest(sms, "ws-1", "Airtel", "Your Airtel broadband bill of Rs 1,178 is due on 25 Oct. Pay now.", time.nowMillis())).isEqualTo(Result.CREATED)
         assertThat(db.statsDao().records().first()).isEqualTo(realBefore + 1)
         assertThat(demoDb.statsDao().records().first()).isEqualTo(0)
-        val realReminder = realGraph.reminders.save(app.ash.domain.model.Reminder(title = "Real", fireAt = time.nowMillis() + 3_600_000))
-        val demoReminder = demoGraph.reminders.save(app.ash.domain.model.Reminder(title = "Demo", fireAt = time.nowMillis() + 3_600_000))
+        // WorkManager measures delays on the real clock, so fire well after both the fixed and the real "now".
+        val fireAt = maxOf(time.nowMillis(), System.currentTimeMillis()) + 86_400_000
+        val realReminder = realGraph.reminders.save(app.ash.domain.model.Reminder(title = "Real", fireAt = fireAt))
+        val demoReminder = demoGraph.reminders.save(app.ash.domain.model.Reminder(title = "Demo", fireAt = fireAt))
         assertThat(demoReminder).isEqualTo(1L) // same numeric id space per database...
         val wm = androidx.work.WorkManager.getInstance(context)
         assertThat(wm.getWorkInfosForUniqueWork("reminder-yash-$realReminder").get()).isNotEmpty()

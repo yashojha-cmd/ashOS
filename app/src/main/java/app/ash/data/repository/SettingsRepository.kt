@@ -30,6 +30,10 @@ data class AppSettings(
     val secureAllScreens: Boolean = false,
     val lastMaintenanceAt: Long = 0,
     val demoDataLoaded: Boolean = false,
+    /** When past SMS were last imported (0 = never). */
+    val smsImportedAt: Long = 0,
+    /** User hid the setup checklist on Today. */
+    val setupDismissed: Boolean = false,
 )
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ash_settings")
@@ -50,6 +54,8 @@ class SettingsRepository @Inject constructor(
         val secureAll = booleanPreferencesKey("secure_all_screens")
         val maintenance = longPreferencesKey("last_maintenance")
         val demo = booleanPreferencesKey("demo_data_loaded")
+        val smsImported = longPreferencesKey("sms_imported_at")
+        val setupDismissed = booleanPreferencesKey("setup_dismissed")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -65,6 +71,8 @@ class SettingsRepository @Inject constructor(
             secureAllScreens = p[Keys.secureAll] ?: false,
             lastMaintenanceAt = p[Keys.maintenance] ?: 0,
             demoDataLoaded = p[Keys.demo] ?: false,
+            smsImportedAt = p[Keys.smsImported] ?: 0,
+            setupDismissed = p[Keys.setupDismissed] ?: false,
         )
     }
 
@@ -81,6 +89,8 @@ class SettingsRepository @Inject constructor(
     suspend fun setSecureAllScreens(enabled: Boolean) = context.dataStore.edit { it[Keys.secureAll] = enabled }
     suspend fun setLastMaintenance(at: Long) = context.dataStore.edit { it[Keys.maintenance] = at }
     suspend fun setDemoDataLoaded(loaded: Boolean) = context.dataStore.edit { it[Keys.demo] = loaded }
+    suspend fun setSmsImportedAt(at: Long) = context.dataStore.edit { it[Keys.smsImported] = at }
+    suspend fun setSetupDismissed(dismissed: Boolean) = context.dataStore.edit { it[Keys.setupDismissed] = dismissed }
 
     suspend fun clear() = context.dataStore.edit { it.clear() }
 }

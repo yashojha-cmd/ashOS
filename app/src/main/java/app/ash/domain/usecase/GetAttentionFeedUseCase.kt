@@ -57,6 +57,12 @@ data class HomeFeed(
     val expiringDocuments: List<Document> = emptyList(),
     val monthlyRecurringPaise: Long = 0,
     val isEmpty: Boolean = true,
+    /** Every open item (for the Life-in-order score). */
+    val openItems: List<AttentionItem> = emptyList(),
+    /** Open items with a date in the next 7 days (today included), soonest first. */
+    val week: List<AttentionItem> = emptyList(),
+    /** Overdue or due today: the "Today" strip. */
+    val today: List<AttentionItem> = emptyList(),
 )
 
 /**
@@ -148,7 +154,13 @@ class GetAttentionFeedUseCase @Inject constructor(
 
         val byScore = items.sortedWith(compareByDescending<AttentionItem> { it.result.score }.thenBy { it.deadlineAt ?: Long.MAX_VALUE })
         val thirtyDays = now + 30L * 24 * 60 * 60 * 1000
+        val open = items.filter { it.result.bucket != Bucket.RECENTLY_HANDLED && it.result.bucket != Bucket.HIDDEN }
+        val weekEnd = app.ash.common.Dates.startOfDay(today.plusDays(7), zone)
+        val todayEnd = app.ash.common.Dates.startOfDay(today.plusDays(1), zone)
         return HomeFeed(
+            openItems = open,
+            week = open.filter { it.deadlineAt != null && it.deadlineAt >= app.ash.common.Dates.startOfDay(today, zone) && it.deadlineAt < weekEnd }.sortedBy { it.deadlineAt },
+            today = open.filter { it.deadlineAt != null && it.deadlineAt < todayEnd && it.deadlineKind != DeadlineKind.EVENT }.sortedByDescending { it.result.score }.take(6),
             needsAttention = byScore.filter { it.result.bucket == Bucket.NEEDS_ATTENTION }.take(5),
             comingUp = byScore.filter { it.result.bucket == Bucket.COMING_UP }.take(5),
             recentlyHandled = items.filter { it.result.bucket == Bucket.RECENTLY_HANDLED }.take(3),

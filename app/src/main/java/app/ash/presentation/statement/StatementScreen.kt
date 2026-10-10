@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ReceiptLong
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.AccountBalance
@@ -89,7 +91,7 @@ class StatementViewModel @Inject constructor(
 /** Balance tab: salary-to-salary statement with a running balance (behind fingerprint/PIN). */
 @Composable
 fun StatementScreen(navigate: (Any) -> Unit) {
-    SensitiveGate(required = true, title = stringResource(R.string.statement_title), onBack = {}) {
+    SensitiveGate(required = true, title = stringResource(R.string.money_title), onBack = {}) {
         StatementContent(navigate)
     }
 }
@@ -99,7 +101,12 @@ private fun StatementContent(navigate: (Any) -> Unit) {
     SecureScreen()
     val vm: StatementViewModel = hiltViewModel()
     val s by vm.statement.collectAsStateWithLifecycle()
-    AshScaffold(title = stringResource(R.string.statement_title)) { padding ->
+    AshScaffold(
+        title = stringResource(R.string.money_title),
+        actions = {
+            IconButton(onClick = { navigate(app.ash.navigation.MoneyRoute) }) { Icon(Icons.AutoMirrored.Rounded.ReceiptLong, stringResource(R.string.money_all)) }
+        },
+    ) { padding ->
         val st = s ?: return@AshScaffold
         LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp)) {
             item { CycleSwitcher(st, vm::older, vm::newer) }
@@ -216,23 +223,31 @@ private fun Figure(label: String, value: String, modifier: Modifier) {
 
 @Composable
 private fun WhereItWent(st: Statement) {
+    // Top five categories as a donut; everything else folds into "Other" so the shares add up.
+    val palette = app.ash.designsystem.chartPalette()
     val top = st.byCategory.take(5)
-    val max = top.maxOf { it.second }.coerceAtLeast(1)
+    val rest = st.byCategory.drop(5).sumOf { it.second }
+    val slices = top.mapIndexed { i, (c, a) -> Triple(stringResource(AshIcons.categoryLabel(c)), a, palette[i % palette.size]) } +
+        (if (rest > 0) listOf(Triple(stringResource(R.string.statement_other), rest, MaterialTheme.colorScheme.outline)) else emptyList())
+    val total = slices.sumOf { it.second }.coerceAtLeast(1)
+    val description = slices.joinToString { "${it.first} ${Money.format(it.second)}" }
     GroupedSection(header = stringResource(R.string.statement_where)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            top.forEach { (category, amount) ->
-                val label = stringResource(AshIcons.categoryLabel(category))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = "$label ${Money.format(amount)}" }) {
-                    Icon(AshIcons.category(category), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 10.dp))
-                    Column(Modifier.weight(1f)) {
-                        Row {
-                            Text(label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                            Text(Money.format(amount), style = MaterialTheme.typography.titleSmall)
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Box(Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
-                            Box(Modifier.fillMaxWidth(amount.toFloat() / max).height(6.dp).clip(RoundedCornerShape(3.dp)).background(MaterialTheme.colorScheme.primary))
-                        }
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(contentAlignment = Alignment.Center) {
+                app.ash.designsystem.Donut(slices.map { it.second.toFloat() to it.third }, description, size = 128.dp)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.statement_spent), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(Money.formatCompact(st.spent), style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                slices.forEach { (label, amount, color) ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(color))
+                        Spacer(Modifier.width(8.dp))
+                        Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 1, modifier = Modifier.weight(1f))
+                        Text("${amount * 100 / total}%", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }

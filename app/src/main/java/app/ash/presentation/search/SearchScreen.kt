@@ -81,7 +81,7 @@ private val suggestions = listOf("bike insurance", "documents expiring", "Amazon
 
 /** Local search over everything (§14). Nothing leaves the device. */
 @Composable
-fun SearchScreen(navigate: (Any) -> Unit) {
+fun SearchScreen(navigate: (Any) -> Unit, onBack: () -> Unit) {
     val vm: SearchViewModel = hiltViewModel()
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle()
@@ -90,7 +90,7 @@ fun SearchScreen(navigate: (Any) -> Unit) {
     val documentsHeader = stringResource(R.string.vault_title)
     LaunchedEffect(Unit) { focus.requestFocus() }
 
-    AshScaffold(title = stringResource(R.string.search_title)) { padding ->
+    AshScaffold(title = stringResource(R.string.search_title), onBack = onBack) { padding ->
         LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 24.dp)) {
             item {
                 OutlinedTextField(
@@ -130,8 +130,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.results(r: SearchResu
     // Records and documents can be long, so they are lazy rows; the rest are small entity tables.
     groupedItems(r.records, key = { "r${it.id}" }, header = recordsHeader) { rec, last ->
         AshRow(
-            title = rec.title,
-            subtitle = listOfNotNull(rec.amountPaise?.let { Money.format(it) }, statusLabel(rec.status), relativeDay(rec.eventAt ?: rec.dueAt ?: rec.createdAt)).joinToString(" · "),
+            title = app.ash.domain.usecase.RecordSummarizer.summarize(rec).subject,
+            subtitle = app.ash.presentation.common.headlineText(app.ash.domain.usecase.RecordSummarizer.summarize(rec).headline),
             icon = AshIcons.category(rec.category), showDivider = !last, onClick = { navigate(RecordRoute(rec.id)) },
         )
     }

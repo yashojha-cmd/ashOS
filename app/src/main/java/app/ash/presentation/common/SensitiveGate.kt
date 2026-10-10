@@ -57,7 +57,7 @@ fun SensitiveGate(required: Boolean, title: String, onBack: () -> Unit, content:
         content()
         return
     }
-    val activity = LocalContext.current as FragmentActivity
+    val activity = androidx.activity.compose.LocalActivity.current as FragmentActivity
     val scope = rememberCoroutineScope()
     val prompt = stringResource(R.string.vault_prompt_title)
     fun unlock() = scope.launch {

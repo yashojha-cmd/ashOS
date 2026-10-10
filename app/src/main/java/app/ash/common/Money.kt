@@ -20,6 +20,19 @@ object Money {
         return (if (negative) "-₹" else "₹") + body
     }
 
+    /** Short Indian form for charts: ₹850, ₹12.4K, ₹3.2L, ₹1.1Cr. */
+    fun formatCompact(paise: Long): String {
+        val r = kotlin.math.abs(paise) / 100.0
+        val sign = if (paise < 0) "-" else ""
+        fun one(v: Double) = if (v >= 100) v.toLong().toString() else String.format(java.util.Locale.US, "%.1f", v).removeSuffix(".0")
+        return sign + when {
+            r >= 1_00_00_000 -> "₹" + one(r / 1_00_00_000) + "Cr"
+            r >= 1_00_000 -> "₹" + one(r / 1_00_000) + "L"
+            r >= 1_000 -> "₹" + one(r / 1_000) + "K"
+            else -> "₹" + r.toLong()
+        }
+    }
+
     /** Groups the last three digits, then every two: 1234567 -> 12,34,567. */
     fun groupIndian(digits: String): String {
         if (digits.length <= 3) return digits

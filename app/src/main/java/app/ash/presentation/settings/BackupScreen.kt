@@ -85,7 +85,7 @@ fun BackupScreen(onBack: () -> Unit, onDeletedAll: () -> Unit) {
     SecureScreen()
     val vm: BackupViewModel = hiltViewModel()
     val busy by vm.busy.collectAsStateWithLifecycle()
-    val activity = LocalContext.current as FragmentActivity
+    val activity = androidx.activity.compose.LocalActivity.current as FragmentActivity
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     var pendingUri by remember { mutableStateOf<Uri?>(null) }

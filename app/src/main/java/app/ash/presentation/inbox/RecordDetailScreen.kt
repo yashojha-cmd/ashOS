@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,10 +117,12 @@ fun RecordDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                         StatusPill(statusLabel(record.status), statusTone(record.status))
                         StatusPill(typeLabel(record.type), Tone.INFO)
                     }
-                    record.amountPaise?.let {
-                        Spacer(Modifier.height(10.dp))
-                        Text(Money.format(it), style = MaterialTheme.typography.displaySmall)
-                    }
+                    // What it means, in one line, with the key identifiers.
+                    val summary = app.ash.domain.usecase.RecordSummarizer.summarize(record)
+                    Spacer(Modifier.height(12.dp))
+                    record.amountPaise?.let { Text(Money.format(it), style = MaterialTheme.typography.displaySmall) }
+                    Text(app.ash.presentation.common.headlineText(summary.headline), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    app.ash.presentation.common.FactChips(summary.facts, Modifier.padding(top = 8.dp))
                 }
             }
             if (record.status == RecordStatus.REVIEW) {
@@ -152,7 +155,11 @@ fun RecordDetailScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                 }
             }
             item {
-                GroupedSection(header = stringResource(R.string.detail_summary), footer = stringResource(R.string.detail_parser_footer, record.extras.parserId ?: "-", (record.confidence * 100).toInt())) {
+                var showOriginal by remember { mutableStateOf(false) }
+                TextButton(onClick = { showOriginal = !showOriginal }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text(stringResource(if (showOriginal) R.string.detail_hide_original else R.string.detail_show_original))
+                }
+                if (showOriginal) GroupedSection(header = stringResource(R.string.detail_summary), footer = stringResource(R.string.detail_parser_footer, record.extras.parserId ?: "-", (record.confidence * 100).toInt())) {
                     Text(
                         record.extras.originalText ?: record.summary,
                         style = MaterialTheme.typography.bodyMedium,

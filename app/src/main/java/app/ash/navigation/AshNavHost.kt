@@ -78,7 +78,7 @@ fun AshRoot(openReminders: MutableStateFlow<Boolean>) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             if (!state.loaded) return@Box
             if (state.secureAll) SecureScreen(alwaysSecure = true)
-            val activity = androidx.compose.ui.platform.LocalContext.current as android.app.Activity
+            val activity = androidx.activity.compose.LocalActivity.current!!
             androidx.compose.animation.AnimatedContent(
                 targetState = when {
                     !state.signedIn -> RootStage.PICK_ACCOUNT
@@ -118,11 +118,9 @@ private data class Tab(val route: Any, val icon: ImageVector, val label: Int)
 
 private val tabs = listOf(
     Tab(HomeRoute, AshIcons.Home, R.string.tab_home),
-    Tab(InboxRoute, AshIcons.Inbox, R.string.tab_inbox),
     Tab(BalanceRoute, androidx.compose.material.icons.Icons.Rounded.AccountBalanceWallet, R.string.tab_balance),
     Tab(VaultRoute, AshIcons.Vault, R.string.tab_vault),
     Tab(LifeRoute, AshIcons.Life, R.string.tab_life),
-    Tab(SearchRoute, AshIcons.Search, R.string.tab_search),
 )
 
 @Composable
@@ -166,7 +164,7 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
                                 }
                             },
                             icon = {
-                                if (tab.route == InboxRoute && reviewCount > 0) {
+                                if (tab.route == HomeRoute && reviewCount > 0) {
                                     BadgedBox(badge = { Badge { Text(reviewCount.coerceAtMost(99).toString()) } }) { Icon(tab.icon, null) }
                                 } else {
                                     Icon(tab.icon, null)
@@ -204,10 +202,10 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
             }
 
             composable<HomeRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { HomeScreen(navigate) }
-            composable<InboxRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { InboxScreen(navigate) }
+            composable<InboxRoute> { InboxScreen(navigate, onBack = back) }
             composable<VaultRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { VaultScreen(navigate) }
             composable<LifeRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { LifeScreen(navigate) }
-            composable<SearchRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { SearchScreen(navigate) }
+            composable<SearchRoute> { SearchScreen(navigate, onBack = back) }
             composable<BalanceRoute>(enterTransition = AshMotion.tabEnter, exitTransition = AshMotion.tabExit, popEnterTransition = AshMotion.tabEnter) { app.ash.presentation.statement.StatementScreen(navigate) }
 
             composable<RecordRoute> { RecordDetailScreen(onBack = back, navigate = navigate) }

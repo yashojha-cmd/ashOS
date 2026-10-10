@@ -3,13 +3,34 @@
     <string name="app_name" translatable="false">ashOS</string>
 
     <!-- Tabs -->
-    <string name="tab_home">Home</string>
+    <string name="tab_home">Today</string>
     <string name="tab_inbox">Inbox</string>
     <string name="tab_vault">Vault</string>
     <string name="tab_life">Life</string>
     <string name="tab_search">Search</string>
-    <string name="tab_balance">Balance</string>
+    <string name="tab_balance">Money</string>
     <string name="statement_title">Statement</string>
+    <string name="headline_insurance">%1$s insurance</string>
+    <string name="headline_paid">Paid %1$s</string>
+    <string name="headline_received">Received %1$s</string>
+    <string name="headline_salary">Salary credited %1$s</string>
+    <string name="headline_refund">Refund %1$s</string>
+    <string name="headline_ordered">Order placed</string>
+    <string name="headline_ordered_eta">Order placed · arriving %1$s</string>
+    <string name="headline_shipped">Shipped</string>
+    <string name="headline_arriving">Arriving %1$s</string>
+    <string name="headline_out_for_delivery">Out for delivery today</string>
+    <string name="headline_delivered">Delivered</string>
+    <string name="headline_cancelled">Order cancelled</string>
+    <string name="headline_returned">Returned</string>
+    <string name="trip_train">Train</string>
+    <string name="trip_flight">Flight</string>
+    <string name="trip_bus">Bus</string>
+    <string name="trip_other">Trip</string>
+    <string name="fact_pnr">PNR %1$s</string>
+    <string name="fact_policy">Policy %1$s</string>
+    <string name="fact_order">Order %1$s</string>
+    <string name="fact_ref">Ref %1$s</string>
     <string name="statement_remaining">Remaining</string>
     <string name="statement_of_salary">of %1$s salary</string>
     <string name="statement_spent">Spent</string>
@@ -228,7 +249,9 @@
     <string name="status_handled">Handled</string>
     <string name="status_archived">Archived</string>
     <string name="detail_details">Details</string>
-    <string name="detail_summary">Original</string>
+    <string name="detail_summary">Original message</string>
+    <string name="detail_show_original">Show original message</string>
+    <string name="detail_hide_original">Hide original message</string>
     <string name="detail_parser_footer">Read by the %1$s rule set with %2$d%% confidence.</string>
     <string name="source_manual">Added by you</string>
     <string name="delete_record_title">Delete this item?</string>
@@ -673,4 +696,45 @@
     <string name="backup_working">Working…</string>
     <string name="backup_exported">Backup saved</string>
     <string name="backup_imported">Backup restored</string>
+    <!-- Today dashboard -->
+    <string name="money_left_cycle">Left this cycle</string>
+    <string name="money_this_month">Spent this month</string>
+    <string name="money_per_day_line">%1$s a day · %2$s</string>
+    <string name="money_spent_line">%1$s out so far</string>
+    <string name="money_placeholder_title">See what\'s left until payday</string>
+    <string name="money_placeholder_body">Import past SMS or allow notifications, and ashOS will track your salary and spending here.</string>
+    <string name="money_ring_cd">%1$d percent of this cycle\'s money left</string>
+    <string name="money_trend_cd">Balance trend this cycle</string>
+    <string name="order_title">Life in order</string>
+    <string name="order_calm">All calm</string>
+    <string name="order_attention">A few things need you</string>
+    <string name="order_busy">Things are piling up</string>
+    <string name="order_all_clear">Nothing overdue. Nothing expiring.</string>
+    <string name="order_cd">Life in order score %1$d out of 100, %2$s</string>
+    <string name="order_explain">Starts at 100. Points come off for things that need you. Deal with them and the score goes back up.</string>
+    <string name="setup_title">Set up ashOS</string>
+    <string name="setup_progress">%1$d of %2$d done</string>
+    <string name="setup_hide">Hide</string>
+    <string name="setup_notifications">Allow notification access</string>
+    <string name="setup_sources">Choose apps to read</string>
+    <string name="setup_sms">Import past SMS (in Settings)</string>
+    <string name="setup_document">Add your first document</string>
+    <string name="setup_lock">Turn on app lock (in Settings)</string>
+    <string name="setup_done">Done</string>
+    <string name="setup_todo">Not done</string>
+    <string name="today_section">Today</string>
+    <string name="today_short">Today</string>
+    <string name="week_section">Next 7 days</string>
+    <string name="week_free_day">Nothing due this day</string>
+    <plurals name="order_overdue"><item quantity="one">%d payment overdue</item><item quantity="other">%d payments overdue</item></plurals>
+    <plurals name="order_expired"><item quantity="one">%d thing expired</item><item quantity="other">%d things expired</item></plurals>
+    <plurals name="order_due_soon"><item quantity="one">%d due in the next 3 days</item><item quantity="other">%d due in the next 3 days</item></plurals>
+    <plurals name="order_expiring"><item quantity="one">%d expiring this week</item><item quantity="other">%d expiring this week</item></plurals>
+    <plurals name="order_review"><item quantity="one">%d message to confirm</item><item quantity="other">%d messages to confirm</item></plurals>
+    <plurals name="order_setup"><item quantity="one">%d setup step left</item><item quantity="other">%d setup steps left</item></plurals>
+    <plurals name="week_day_cd"><item quantity="one">%1$s %2$d, %3$d item</item><item quantity="other">%1$s %2$d, %3$d items</item></plurals>
+    <string name="statement_other">Other</string>
+    <string name="money_all">Transactions, bills and subscriptions</string>
+    <string name="money_hidden">Tap to see your balance</string>
+    <string name="inbox_open">Messages</string>
 </resources>

@@ -23,7 +23,24 @@ Each account is a separate data space with its own SQLCipher database, its own d
 
 Android keeps no notification history for apps, so earlier notifications cannot be recovered. Android does keep SMS: Settings → Account → **Import past SMS** asks for `READ_SMS` and reads the last 90 days of the inbox. Only business senders (DLT headers like `VM-HDFCBK`, or short codes) are read; messages from personal numbers are skipped without being parsed. Imported items keep their original dates, past deadlines are filed as handled, and uncertain matches are only logged. On Google Play, `READ_SMS` requires a permissions declaration (the "SMS-based money management" use case).
 
-## Balance tab (statements)
+## Today, Money, Vault, Life
+
+The app has four tabs. Search and Messages (the inbox) open from the Today top bar.
+
+- **Today** is one glanceable dashboard:
+  - **Life in order**: a 0–100 score. Points come off for overdue payments, expired documents, things due in 3 days or expiring this week, messages waiting for confirmation, and unfinished setup. Each reason is capped. Tap the score to see exactly where every point went.
+  - **Money left this cycle**: a ring for the share left, a sparkline of the running balance, and a safe amount per day. The amount stays hidden ("₹ • • • •") until you unlock with fingerprint or PIN, the same rule as the Money tab.
+  - **Today**: anything overdue or due today.
+  - **Next 7 days**: a week strip with coloured markers; tap a day to see what's due.
+  - **Setup checklist** (real account only): notification access, apps to read, past-SMS import, first document, app lock.
+  - Recent payments.
+- **Money**: the salary statement (described below), with a category donut chart. The top-right button opens all transactions, bills and subscriptions.
+- **Every card shows meaning, not the message.** `RecordSummarizer` turns a record into a subject, one headline and up to three facts:
+  - Example: "ACKO · Vehicle insurance · Expires in 12 days · Policy AB123" rather than "ACKO / ACKO / pasted SMS / Insurance · Insurance".
+  - The source app is shown only when it adds information.
+  - The original message is one tap away in the detail view ("Show original message").
+
+## Money tab (statements)
 
 A salary-to-salary statement built from your bank and UPI messages:
 
@@ -64,7 +81,7 @@ Requirements: the Android SDK (compileSdk 37.2) and a JDK 17+ (the JDK bundled w
 
 ```bash
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest      # 68 unit, Robolectric and Compose tests
+./gradlew testDebugUnitTest      # 77 unit, Robolectric and Compose tests
 ./gradlew assembleStaging        # R8-optimised build signed with the debug key, for testing on a phone
 ./gradlew assembleRelease        # R8-minified, unsigned
 ```
@@ -133,6 +150,7 @@ Before installing a new build on the test phone: read the device log and frame s
 | `ParserGoldenTest` | 43 real-world notification formats (incl. salary credits, Rs:500, INR500, "debited by", ATM, Avl/Avbl Bal): HDFC, SBI, ICICI, Axis, Hinglish, GPay, PhonePe, Paytm, Amazon, Flipkart, Swiggy, Zomato, Delhivery, IRCTC, IndiGo, redBus, ACKO, LIC, Star Health, BESCOM, Airtel, Jio, credit cards, Netflix, YouTube, Spotify, PUC, e-challan, EPFO, UIDAI, OTPs, promos |
 | `ExtractorTest` | amounts, Indian date formats, references, merchants |
 | `IntelligenceTest` | priority scoring, search queries, subscription detection, OCR fields, reminder planning |
+| `DashboardTest` | record summaries (insurance, bills, salary, trips, fallback sentence), Life-in-order score and caps, compact Indian money (K/L/Cr) |
 | `CommonTest` | money formatting, log redaction, backup encryption (round trip, wrong password, tampering) |
 | `NotificationPipelineTest` | end to end with a real Room database: allow-list, OTP skip, duplicates, bills and reminders, delivery merging, review/confirm, search, Home feed, SMS history import, workspace isolation, cross-app payment merge, salary detection and learning, bill settled by payment, category learning, inbox filtering |
 | `StatementCalculatorTest` | salary cycles, running balance, reset on new salary, previous cycles, expected salary and daily budget, insights |

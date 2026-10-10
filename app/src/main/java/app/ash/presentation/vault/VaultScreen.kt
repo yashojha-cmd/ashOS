@@ -150,7 +150,7 @@ fun VaultScreen(navigate: (Any) -> Unit) {
     val docs by vm.documents.collectAsStateWithLifecycle()
     val unlocked by vm.unlocked.collectAsStateWithLifecycle()
     val importing by vm.importing.collectAsStateWithLifecycle()
-    val activity = LocalContext.current as FragmentActivity
+    val activity = androidx.activity.compose.LocalActivity.current as FragmentActivity
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     var menu by remember { mutableStateOf(false) }

@@ -106,10 +106,10 @@ fun statusTone(status: RecordStatus): Tone = when (status) {
 
 /** Unified local inbox (§6) with status filters and swipe to handle or archive. */
 @Composable
-fun InboxScreen(navigate: (Any) -> Unit) {
+fun InboxScreen(navigate: (Any) -> Unit, onBack: () -> Unit) {
     val vm: InboxViewModel = hiltViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
-    AshScaffold(title = stringResource(R.string.inbox_title)) { padding ->
+    AshScaffold(title = stringResource(R.string.inbox_title), onBack = onBack) { padding ->
         LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 24.dp)) {
             item {
                 Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -209,27 +209,19 @@ private fun InboxRow(
     ) {
         Surface(onClick = onClick, shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(14.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(AshIcons.category(record.category), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(record.sourceLabel ?: typeLabel(record.type), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1)
+                // Meaning first (subject, headline, key facts); the raw message lives in the detail view.
+                app.ash.presentation.common.RecordSummaryContent(record) {
                     Text(relativeDay(record.createdAt), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Spacer(Modifier.size(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(record.title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    record.amountPaise?.let { Text(Money.format(it), style = MaterialTheme.typography.titleMedium) }
-                }
-                Text(record.summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.size(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatusPill(statusLabel(record.status), statusTone(record.status))
-                    Text("${stringResource(AshIcons.categoryLabel(record.category))} · ${typeLabel(record.type)}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Status only when it asks something of the user.
+                if (record.status == RecordStatus.ACTION_REQUIRED || record.status == RecordStatus.HANDLED || record.status == RecordStatus.ARCHIVED) {
+                    Spacer(Modifier.size(8.dp))
+                    StatusPill(statusLabel(record.status), statusTone(record.status), Modifier.padding(start = 52.dp))
                 }
                 if (record.status == RecordStatus.REVIEW) {
                     Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.review_prompt), style = MaterialTheme.typography.bodySmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
+                    Text(stringResource(R.string.review_prompt), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 52.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(start = 44.dp, top = 6.dp)) {
                         OutlinedButton(onClick = onConfirm) { Text(stringResource(R.string.action_confirm)) }
                         TextButton(onClick = onClick) { Text(stringResource(R.string.action_edit)) }
                         TextButton(onClick = onArchive) { Text(stringResource(R.string.action_not_important)) }

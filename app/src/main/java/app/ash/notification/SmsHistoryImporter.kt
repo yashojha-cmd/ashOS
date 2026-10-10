@@ -31,6 +31,7 @@ class SmsHistoryImporter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val graphs: WorkspaceGraphs,
     private val time: TimeProvider,
+    private val settings: app.ash.data.repository.SettingsRepository,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     data class Result(val scanned: Int, val businessMessages: Int, val created: Int, val skippedPersonal: Int)
@@ -76,6 +77,7 @@ class SmsHistoryImporter @Inject constructor(
         }
         onProgress(messages.size, messages.size)
         graph.life.detectSubscriptions()
+        settings.setSmsImportedAt(time.nowMillis())
         AshLogger.i(TAG, "SMS import: scanned=${messages.size} business=$business created=$created personalSkipped=$personal days=$days in ${(System.nanoTime() - started) / 1_000_000} ms")
         Result(messages.size, business, created, personal)
     }
