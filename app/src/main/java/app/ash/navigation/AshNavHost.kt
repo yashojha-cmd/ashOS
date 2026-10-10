@@ -1,5 +1,25 @@
 package app.ash.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.rounded.WbSunny
+import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,9 +32,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -114,13 +131,13 @@ fun AshRoot(openReminders: MutableStateFlow<Boolean>) {
     }
 }
 
-private data class Tab(val route: Any, val icon: ImageVector, val label: Int)
+private data class Tab(val route: Any, val icon: ImageVector, val selectedIcon: ImageVector, val label: Int)
 
 private val tabs = listOf(
-    Tab(HomeRoute, AshIcons.Home, R.string.tab_home),
-    Tab(BalanceRoute, androidx.compose.material.icons.Icons.Rounded.AccountBalanceWallet, R.string.tab_balance),
-    Tab(VaultRoute, AshIcons.Vault, R.string.tab_vault),
-    Tab(LifeRoute, AshIcons.Life, R.string.tab_life),
+    Tab(HomeRoute, Icons.Outlined.WbSunny, Icons.Rounded.WbSunny, R.string.tab_home),
+    Tab(BalanceRoute, Icons.Outlined.AccountBalanceWallet, Icons.Rounded.AccountBalanceWallet, R.string.tab_balance),
+    Tab(VaultRoute, Icons.Outlined.Lock, Icons.Rounded.Lock, R.string.tab_vault),
+    Tab(LifeRoute, Icons.Outlined.Category, Icons.Rounded.Category, R.string.tab_life),
 )
 
 @Composable
@@ -150,31 +167,18 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
         contentWindowInsets = WindowInsets(0),
         bottomBar = {
             if (onTab) {
-                NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerLow) {
-                    tabs.forEach { tab ->
-                        val selected = destination?.hasRoute(tab.route::class) == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                nav.navigate(tab.route) {
-                                    // Home is the root of the tab stack even when the app started on onboarding.
-                                    popUpTo<HomeRoute> { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                if (tab.route == HomeRoute && reviewCount > 0) {
-                                    BadgedBox(badge = { Badge { Text(reviewCount.coerceAtMost(99).toString()) } }) { Icon(tab.icon, null) }
-                                } else {
-                                    Icon(tab.icon, null)
-                                }
-                            },
-                            label = { Text(stringResource(tab.label)) },
-                            colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primaryContainer),
-                        )
-                    }
-                }
+                IosTabBar(
+                    selectedIndex = tabs.indexOfFirst { destination?.hasRoute(it.route::class) == true },
+                    badgeOnFirst = reviewCount,
+                    onSelect = { tab ->
+                        nav.navigate(tab.route) {
+                            // Today is the root of the tab stack even when the app started on onboarding.
+                            popUpTo<HomeRoute> { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             }
         },
     ) { padding ->
@@ -243,3 +247,56 @@ private fun AshNavHost(nav: NavHostController, startOnboarding: Boolean, reviewC
 }
 
 private enum class RootStage { PICK_ACCOUNT, PREPARING, APP }
+
+/**
+ * iOS-style tab bar: near-opaque background with a top hairline, filled icon and accent tint for
+ * the selected tab, grey otherwise, small labels, no Material indicator pill, a light haptic tick.
+ */
+@Composable
+private fun IosTabBar(selectedIndex: Int, badgeOnFirst: Int, onSelect: (Tab) -> Unit) {
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val hairline = app.ash.designsystem.AshTheme.status.separator
+    val accent = MaterialTheme.colorScheme.primary
+    val idle = MaterialTheme.colorScheme.onSurfaceVariant
+    androidx.compose.foundation.layout.Row(
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.97f))
+            .drawBehind { drawLine(hairline, androidx.compose.ui.geometry.Offset(0f, 0f), androidx.compose.ui.geometry.Offset(size.width, 0f), strokeWidth = 0.5.dp.toPx()) }
+            .navigationBarsPadding()
+            .height(54.dp)
+            .selectableGroup(),
+    ) {
+        tabs.forEachIndexed { i, tab ->
+            val selected = i == selectedIndex
+            val label = stringResource(tab.label)
+            androidx.compose.foundation.layout.Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .selectable(
+                        selected = selected,
+                        role = androidx.compose.ui.semantics.Role.Tab,
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            if (!selected) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                            onSelect(tab)
+                        },
+                    ),
+            ) {
+                val tint = if (selected) accent else idle
+                if (i == 0 && badgeOnFirst > 0) {
+                    BadgedBox(badge = { Badge { Text(badgeOnFirst.coerceAtMost(99).toString()) } }) {
+                        Icon(if (selected) tab.selectedIcon else tab.icon, null, tint = tint, modifier = Modifier.size(25.dp))
+                    }
+                } else {
+                    Icon(if (selected) tab.selectedIcon else tab.icon, null, tint = tint, modifier = Modifier.size(25.dp))
+                }
+                Text(label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.sp), color = tint, maxLines = 1)
+            }
+        }
+    }
+}

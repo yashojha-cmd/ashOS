@@ -1,5 +1,15 @@
 package app.ash.designsystem
 
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.rounded.ArrowBackIos
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.animateContentSize
@@ -89,6 +99,10 @@ fun AshScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // Like a UINavigationBar: same colour as the page until content scrolls under it, then a
+    // near-opaque bar with a hairline. Expanded height is iOS-compact rather than Material's 152dp.
+    val collapsed = scrollBehavior.state.collapsedFraction > 0.98f
+    val hairline = AshTheme.status.separator
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = MaterialTheme.colorScheme.background,
@@ -100,16 +114,28 @@ fun AshScaffold(
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowBackIos,
+                                contentDescription = stringResource(R.string.cd_back),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp),
+                            )
                         }
                     }
                 },
-                actions = actions,
+                actions = {
+                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) { actions() }
+                },
+                collapsedHeight = 52.dp,
+                expandedHeight = 108.dp,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
                 ),
                 scrollBehavior = scrollBehavior,
+                modifier = Modifier.drawBehind {
+                    if (collapsed) drawLine(hairline, Offset(0f, size.height), Offset(size.width, size.height), strokeWidth = 0.5.dp.toPx())
+                },
             )
         },
         floatingActionButton = floatingActionButton,
@@ -130,7 +156,7 @@ fun GroupedSection(
         if (header != null) {
             Text(
                 header.uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 16.dp, bottom = 6.dp).semantics { heading() },
             )
@@ -170,7 +196,7 @@ fun <T> androidx.compose.foundation.lazy.LazyListScope.groupedItems(
         item(key = "header-$header") {
             Text(
                 header.uppercase(),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 32.dp, top = 8.dp, bottom = 6.dp).semantics { heading() },
             )
@@ -178,7 +204,7 @@ fun <T> androidx.compose.foundation.lazy.LazyListScope.groupedItems(
     }
     val lastIndex = items.lastIndex
     items(items.size, key = { key(items[it]) }) { index ->
-        val radius = 22.dp
+        val radius = 14.dp
         val shape = RoundedCornerShape(
             topStart = if (index == 0) radius else 0.dp,
             topEnd = if (index == 0) radius else 0.dp,
@@ -195,14 +221,19 @@ fun <T> androidx.compose.foundation.lazy.LazyListScope.groupedItems(
     }
 }
 
+/**
+ * A list row in the iOS style: optional coloured icon tile (white glyph on a solid rounded square,
+ * like Settings), title and subtitle, trailing content, a grey highlight while pressed instead of a
+ * ripple, and a hairline separator inset to the text.
+ */
 @Composable
 fun AshRow(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     icon: ImageVector? = null,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
-    iconBackground: Color = MaterialTheme.colorScheme.primaryContainer,
+    iconTint: Color = Color.White,
+    iconBackground: Color? = null,
     showDivider: Boolean = true,
     showChevron: Boolean = false,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -210,21 +241,23 @@ fun AshRow(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val interaction = remember { MutableInteractionSource() }
-    Column(modifier) {
+    val pressed by interaction.collectIsPressedAsState()
+    val highlight = MaterialTheme.colorScheme.surfaceContainerHigh
+    Column(modifier.background(if (pressed && onClick != null) highlight else Color.Transparent)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 56.dp)
-                .then(if (onClick != null) Modifier.clickable(interaction, indication = androidx.compose.material3.ripple(), role = Role.Button, onClick = onClick) else Modifier)
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .heightIn(min = 50.dp)
+                .then(if (onClick != null) Modifier.clickable(interaction, indication = null, role = Role.Button, onClick = onClick) else Modifier)
+                .padding(horizontal = 16.dp, vertical = 9.dp),
         ) {
             if (icon != null) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(iconBackground),
+                    modifier = Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(iconBackground ?: AshIcons.tileColor(icon)),
                 ) {
-                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+                    Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(19.dp))
                 }
                 Spacer(Modifier.width(14.dp))
             }
@@ -236,20 +269,33 @@ fun AshRow(
             }
             if (trailing != null) {
                 Spacer(Modifier.width(8.dp))
-                trailing()
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) { trailing() }
             }
             if (showChevron) {
-                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
+                Spacer(Modifier.width(4.dp))
+                Icon(Icons.AutoMirrored.Rounded.ArrowForwardIos, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(14.dp))
             }
         }
         if (showDivider) {
             HorizontalDivider(
+                thickness = 0.5.dp,
                 color = AshTheme.status.separator,
-                modifier = Modifier.padding(start = if (icon != null) 64.dp else 16.dp),
+                modifier = Modifier.padding(start = if (icon != null) 60.dp else 16.dp),
             )
         }
     }
 }
+
+/** iOS switch colours: green track when on, light grey when off, white thumb, no outline. */
+@Composable
+fun iosSwitchColors() = SwitchDefaults.colors(
+    checkedThumbColor = Color.White,
+    checkedTrackColor = if (MaterialTheme.colorScheme.background == Color.Black) Color(0xFF30D158) else Color(0xFF34C759),
+    checkedBorderColor = Color.Transparent,
+    uncheckedThumbColor = Color.White,
+    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+    uncheckedBorderColor = Color.Transparent,
+)
 
 @Composable
 fun SwitchRow(
@@ -267,7 +313,7 @@ fun SwitchRow(
         icon = icon,
         showDivider = showDivider,
         onClick = if (enabled) ({ onCheckedChange(!checked) }) else null,
-        trailing = { Switch(checked = checked, onCheckedChange = if (enabled) onCheckedChange else null, enabled = enabled) },
+        trailing = { Switch(checked = checked, onCheckedChange = if (enabled) onCheckedChange else null, enabled = enabled, colors = iosSwitchColors(), thumbContent = null) },
     )
 }
 
@@ -317,8 +363,10 @@ fun AttentionCard(
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null,
 ) {
-    val (fg, bg) = toneColors(tone)
+    val (fg, _) = toneColors(tone)
     val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val haptics = LocalHapticFeedback.current
     val viewLabel = stringResource(R.string.action_view)
     Surface(
         shape = MaterialTheme.shapes.large,
@@ -329,26 +377,31 @@ fun AttentionCard(
             .clip(MaterialTheme.shapes.large)
             .combinedClickable(
                 interactionSource = interaction,
-                indication = androidx.compose.material3.ripple(),
+                indication = null,
                 role = Role.Button,
                 onClickLabel = viewLabel,
                 onLongClickLabel = stringResource(R.string.action_why_here),
-                onLongClick = onLongClick,
+                onLongClick = onLongClick?.let { long -> { haptics.performHapticFeedback(HapticFeedbackType.LongPress); long() } },
                 onClick = onClick,
             )
             .semantics(mergeDescendants = true) { contentDescription = "$label. $title. $detail" },
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(14.dp)) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(bg)) {
-                Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(24.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(if (pressed) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Transparent).padding(horizontal = 14.dp, vertical = 12.dp)) {
+            // Solid tile in the status colour with a white glyph; the label repeats the meaning in text.
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(40.dp).clip(RoundedCornerShape(11.dp)).background(fg)) {
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
             }
-            Spacer(Modifier.width(14.dp))
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                StatusPill(label, tone)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            TextButton(onClick = onClick) { Text(viewLabel) }
+            Spacer(Modifier.width(8.dp))
+            Column(horizontalAlignment = Alignment.End) {
+                Text(label, style = MaterialTheme.typography.labelSmall, color = fg, maxLines = 1)
+            }
+            Spacer(Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Rounded.ArrowForwardIos, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(14.dp))
         }
     }
 }
@@ -357,7 +410,7 @@ fun AttentionCard(
 fun SectionHeader(text: String, modifier: Modifier = Modifier, action: (@Composable () -> Unit)? = null) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 20.dp, bottom = 6.dp),
+        modifier = modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 24.dp, bottom = 8.dp),
     ) {
         Text(text, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f).semantics { heading() })
         action?.invoke()
@@ -400,7 +453,7 @@ fun MessageBanner(
     onAction: (() -> Unit)? = null,
 ) {
     val (fg, bg) = toneColors(tone)
-    Surface(shape = MaterialTheme.shapes.medium, color = bg, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+    Surface(shape = MaterialTheme.shapes.large, color = bg, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 14.dp, end = 6.dp, top = 10.dp, bottom = 10.dp)) {
             Icon(toneIcon(tone), contentDescription = null, tint = fg, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(10.dp))
@@ -416,8 +469,8 @@ fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
         onClick = onClick,
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
-        contentPadding = PaddingValues(vertical = 16.dp),
-        modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
+        contentPadding = PaddingValues(vertical = 14.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 50.dp),
     ) { Text(text, style = MaterialTheme.typography.titleMedium) }
 }
 
@@ -428,8 +481,8 @@ fun DestructiveButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
-        contentPadding = PaddingValues(vertical = 16.dp),
-        modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
+        contentPadding = PaddingValues(vertical = 14.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 50.dp),
     ) { Text(text, style = MaterialTheme.typography.titleMedium) }
 }
 
@@ -482,5 +535,28 @@ private object SecureFlag {
 fun CenteredLoading(modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         androidx.compose.material3.CircularProgressIndicator()
+    }
+}
+
+/** iOS-style filter capsule: filled dark (or accent) when selected, soft grey otherwise, no outline. */
+@Composable
+fun Capsule(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, leading: ImageVector? = null) {
+    val bg by androidx.compose.animation.animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceContainerHigh, label = "capsule",
+    )
+    val fg = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(CircleShape)
+            .background(bg)
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 7.dp),
+    ) {
+        if (leading != null) {
+            Icon(leading, contentDescription = null, tint = fg, modifier = Modifier.size(15.dp))
+            Spacer(Modifier.width(5.dp))
+        }
+        Text(text, style = MaterialTheme.typography.labelLarge, color = fg, maxLines = 1)
     }
 }

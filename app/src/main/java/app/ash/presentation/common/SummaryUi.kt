@@ -116,10 +116,10 @@ fun RecordSummaryContent(record: Record, modifier: Modifier = Modifier, trailing
     val summary = RecordSummarizer.summarize(record)
     Row(modifier, verticalAlignment = Alignment.Top) {
         Box(
-            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+            Modifier.size(40.dp).clip(RoundedCornerShape(11.dp)).background(AshIcons.categoryColor(record.category)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(AshIcons.category(record.category), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
+            Icon(AshIcons.category(record.category), null, tint = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {

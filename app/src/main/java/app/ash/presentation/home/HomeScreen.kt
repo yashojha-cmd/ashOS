@@ -31,7 +31,6 @@ import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -139,13 +138,9 @@ fun HomeScreen(navigate: (Any) -> Unit) {
             IconButton(onClick = { navigate(SearchRoute) }) { Icon(Icons.Rounded.Search, stringResource(R.string.search_title)) }
             IconButton(onClick = { navigate(InboxRoute) }) { Icon(AshIcons.Inbox, stringResource(R.string.inbox_open)) }
             IconButton(onClick = { navigate(SettingsRoute) }) { Icon(Icons.Rounded.Settings, stringResource(R.string.settings_title)) }
-        },
-        floatingActionButton = {
             Box {
-                FloatingActionButton(onClick = { addMenu = true }, containerColor = MaterialTheme.colorScheme.primary) {
-                    Icon(Icons.Rounded.Add, stringResource(R.string.action_add))
-                }
-                DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                IconButton(onClick = { addMenu = true }) { Icon(Icons.Rounded.Add, stringResource(R.string.action_add), modifier = Modifier.size(28.dp)) }
+                DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }, shape = MaterialTheme.shapes.large) {
                     DropdownMenuItem(text = { Text(stringResource(R.string.add_bill)) }, onClick = { addMenu = false; navigate(RecordEditRoute(type = RecordType.BILL.name)) })
                     DropdownMenuItem(text = { Text(stringResource(R.string.add_transaction)) }, onClick = { addMenu = false; navigate(RecordEditRoute(type = RecordType.TRANSACTION.name)) })
                     DropdownMenuItem(text = { Text(stringResource(R.string.add_appointment)) }, onClick = { addMenu = false; navigate(RecordEditRoute(type = RecordType.APPOINTMENT.name)) })
@@ -154,8 +149,9 @@ fun HomeScreen(navigate: (Any) -> Unit) {
                 }
             }
         },
+        floatingActionButton = {},
     ) { padding ->
-        LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 104.dp)) {
+        LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp)) {
             item {
                 Text(todayLabel, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 20.dp))
             }

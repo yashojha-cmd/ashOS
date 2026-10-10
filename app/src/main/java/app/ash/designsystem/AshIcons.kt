@@ -66,6 +66,34 @@ object AshIcons {
         Category.OTHER -> Icons.Rounded.MoreHoriz
     }
 
+    /** iOS system colour for a category (icon tiles, chart legends). */
+    fun categoryColor(category: Category): androidx.compose.ui.graphics.Color = when (category) {
+        Category.FINANCE -> TilePalette[1]
+        Category.BILLS -> TilePalette[2]
+        Category.SHOPPING -> TilePalette[6]
+        Category.TRAVEL -> TilePalette[0]
+        Category.VEHICLE -> TilePalette[4]
+        Category.INSURANCE -> TilePalette[7]
+        Category.DOCUMENTS -> TilePalette[0]
+        Category.SUBSCRIPTIONS -> TilePalette[5]
+        Category.HEALTHCARE -> TilePalette[3]
+        Category.HOME -> TilePalette[8]
+        Category.WORK -> TilePalette[9]
+        Category.EDUCATION -> TilePalette[2]
+        Category.DELIVERIES -> TilePalette[2]
+        Category.GOVERNMENT -> TilePalette[4]
+        Category.REMINDERS -> TilePalette[3]
+        Category.OTHER -> TilePalette[9]
+    }
+
+    private val tileByIcon: Map<String, androidx.compose.ui.graphics.Color> by lazy {
+        Category.entries.associate { category(it).name to categoryColor(it) }
+    }
+
+    /** Tile colour for any icon: the category colour when it is a category icon, otherwise a stable pick. */
+    fun tileColor(icon: ImageVector): androidx.compose.ui.graphics.Color =
+        tileByIcon[icon.name] ?: TilePalette[(icon.name.hashCode() and Int.MAX_VALUE) % TilePalette.size]
+
     @StringRes
     fun categoryLabel(category: Category): Int = when (category) {
         Category.FINANCE -> R.string.cat_finance

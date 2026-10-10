@@ -114,19 +114,19 @@ fun InboxScreen(navigate: (Any) -> Unit, onBack: () -> Unit) {
             item {
                 Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     InboxFilter.entries.forEach { f ->
-                        FilterChip(selected = state.filter == f, onClick = { vm.setFilter(f) }, label = { Text(filterLabel(f)) })
+                        app.ash.designsystem.Capsule(filterLabel(f), selected = state.filter == f, onClick = { vm.setFilter(f) })
                     }
                 }
             }
             item {
                 Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = state.category == null, onClick = { vm.setCategory(null) }, label = { Text(stringResource(R.string.filter_all_categories)) })
+                    app.ash.designsystem.Capsule(stringResource(R.string.filter_all_categories), selected = state.category == null, onClick = { vm.setCategory(null) })
                     Category.entries.forEach { c ->
-                        FilterChip(
+                        app.ash.designsystem.Capsule(
+                            stringResource(AshIcons.categoryLabel(c)),
                             selected = state.category == c,
                             onClick = { vm.setCategory(if (state.category == c) null else c) },
-                            label = { Text(stringResource(AshIcons.categoryLabel(c))) },
-                            leadingIcon = { Icon(AshIcons.category(c), null, Modifier.size(16.dp)) },
+                            leading = AshIcons.category(c),
                         )
                     }
                 }

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import app.ash.data.repository.ThemeMode
 
 /**
- * ASH palette: cool ash-grey neutrals, a single ember accent, and semantic status colours.
+ * ashOS palette, modelled on iOS system colours.
  * Status is always paired with an icon and a text label, never colour alone.
  */
 @Immutable
@@ -33,87 +33,107 @@ data class AshStatusColors(
     val separator: Color,
 )
 
-private val Ember = Color(0xFFC2581C)
-private val EmberDark = Color(0xFFF0935A)
+// iOS-style system palette: neutral greys, true black in dark mode, one vivid accent (indigo),
+// and the familiar red / orange / green / blue status hues (darkened slightly where used as text).
+private val Accent = Color(0xFF5856D6)
+private val AccentDark = Color(0xFF7D7AFF)
 
 private val LightColors: ColorScheme = lightColorScheme(
-    primary = Ember,
+    primary = Accent,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFFBE3D4),
-    onPrimaryContainer = Color(0xFF4A1C02),
-    secondary = Color(0xFF4F5862),
+    primaryContainer = Color(0xFFE7E6FB),
+    onPrimaryContainer = Color(0xFF1E1C6B),
+    secondary = Color(0xFF636366),
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE3E7EB),
-    onSecondaryContainer = Color(0xFF1B1F23),
-    tertiary = Color(0xFF2F6F8F),
-    background = Color(0xFFF4F5F6),
-    onBackground = Color(0xFF15181B),
+    secondaryContainer = Color(0xFFE5E5EA),
+    onSecondaryContainer = Color(0xFF1C1C1E),
+    tertiary = Color(0xFF007AFF),
+    background = Color(0xFFF2F2F7),
+    onBackground = Color(0xFF000000),
     surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF15181B),
-    surfaceVariant = Color(0xFFECEEF0),
-    onSurfaceVariant = Color(0xFF5A626A),
+    onSurface = Color(0xFF000000),
+    surfaceVariant = Color(0xFFF2F2F7),
+    onSurfaceVariant = Color(0xFF6C6C70),
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF9FAFA),
-    surfaceContainer = Color(0xFFF1F2F4),
-    surfaceContainerHigh = Color(0xFFEBEDEF),
-    surfaceContainerHighest = Color(0xFFE5E7EA),
-    outline = Color(0xFFC3C8CD),
-    outlineVariant = Color(0xFFDDE1E4),
-    error = Color(0xFFB42318),
+    surfaceContainerLow = Color(0xFFFFFFFF),
+    surfaceContainer = Color(0xFFF2F2F7),
+    surfaceContainerHigh = Color(0xFFE9E9EE),
+    surfaceContainerHighest = Color(0xFFE5E5EA),
+    inverseSurface = Color(0xFF1C1C1E),
+    inverseOnSurface = Color.White,
+    outline = Color(0xFFC7C7CC),
+    outlineVariant = Color(0xFFD1D1D6),
+    error = Color(0xFFD70015),
     onError = Color.White,
 )
 
 private val DarkColors: ColorScheme = darkColorScheme(
-    primary = EmberDark,
-    onPrimary = Color(0xFF3A1600),
-    primaryContainer = Color(0xFF4D2410),
-    onPrimaryContainer = Color(0xFFFFDBC8),
-    secondary = Color(0xFFB9C1C9),
-    onSecondary = Color(0xFF242A30),
-    secondaryContainer = Color(0xFF2C3238),
-    onSecondaryContainer = Color(0xFFDDE3E9),
-    tertiary = Color(0xFF8CC7E6),
-    background = Color(0xFF0F1113),
-    onBackground = Color(0xFFE6E8EA),
-    surface = Color(0xFF181B1E),
-    onSurface = Color(0xFFE6E8EA),
-    surfaceVariant = Color(0xFF22262A),
-    onSurfaceVariant = Color(0xFF9EA6AE),
-    surfaceContainerLowest = Color(0xFF0B0D0E),
-    surfaceContainerLow = Color(0xFF15181B),
-    surfaceContainer = Color(0xFF1C1F23),
-    surfaceContainerHigh = Color(0xFF23272B),
-    surfaceContainerHighest = Color(0xFF2B2F34),
-    outline = Color(0xFF454C53),
-    outlineVariant = Color(0xFF30353A),
-    error = Color(0xFFFF8A80),
-    onError = Color(0xFF3B0A06),
+    primary = AccentDark,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF2B2A5C),
+    onPrimaryContainer = Color(0xFFE2E1FF),
+    secondary = Color(0xFFAEAEB2),
+    onSecondary = Color(0xFF1C1C1E),
+    secondaryContainer = Color(0xFF2C2C2E),
+    onSecondaryContainer = Color(0xFFE5E5EA),
+    tertiary = Color(0xFF0A84FF),
+    background = Color(0xFF000000),
+    onBackground = Color.White,
+    surface = Color(0xFF1C1C1E),
+    onSurface = Color.White,
+    surfaceVariant = Color(0xFF1C1C1E),
+    onSurfaceVariant = Color(0xFF98989F),
+    surfaceContainerLowest = Color(0xFF000000),
+    surfaceContainerLow = Color(0xFF1C1C1E),
+    surfaceContainer = Color(0xFF1C1C1E),
+    surfaceContainerHigh = Color(0xFF2C2C2E),
+    surfaceContainerHighest = Color(0xFF3A3A3C),
+    inverseSurface = Color.White,
+    inverseOnSurface = Color.Black,
+    outline = Color(0xFF545458),
+    outlineVariant = Color(0xFF38383A),
+    error = Color(0xFFFF453A),
+    onError = Color.White,
 )
 
 private val LightStatus = AshStatusColors(
-    urgent = Color(0xFFB42318), urgentContainer = Color(0xFFFDECEA),
-    soon = Color(0xFF8F5400), soonContainer = Color(0xFFFFF1D6),
-    ok = Color(0xFF1C7340), okContainer = Color(0xFFE3F3E8),
-    info = Color(0xFF2F6F8F), infoContainer = Color(0xFFE2F0F7),
-    groupedBackground = Color(0xFFF4F5F6), separator = Color(0xFFE3E6E9),
+    urgent = Color(0xFFD70015), urgentContainer = Color(0xFFFFE5E3),
+    soon = Color(0xFFC93400), soonContainer = Color(0xFFFFEEDB),
+    ok = Color(0xFF248A3D), okContainer = Color(0xFFE2F6E7),
+    info = Color(0xFF0071E3), infoContainer = Color(0xFFE1EEFF),
+    groupedBackground = Color(0xFFF2F2F7), separator = Color(0xFFC6C6C8),
 )
 
 private val DarkStatus = AshStatusColors(
-    urgent = Color(0xFFFF8A80), urgentContainer = Color(0xFF3A1917),
-    soon = Color(0xFFF5C062), soonContainer = Color(0xFF33280F),
-    ok = Color(0xFF7BD69A), okContainer = Color(0xFF152E1E),
-    info = Color(0xFF8CC7E6), infoContainer = Color(0xFF14262F),
-    groupedBackground = Color(0xFF0F1113), separator = Color(0xFF2A2E33),
+    urgent = Color(0xFFFF453A), urgentContainer = Color(0xFF3D1513),
+    soon = Color(0xFFFF9F0A), soonContainer = Color(0xFF3A2606),
+    ok = Color(0xFF30D158), okContainer = Color(0xFF0F2E18),
+    info = Color(0xFF0A84FF), infoContainer = Color(0xFF0B2440),
+    groupedBackground = Color(0xFF000000), separator = Color(0xFF38383A),
+)
+
+/** iOS system colours for icon tiles (Settings-style): white glyph on a solid rounded square. */
+val TilePalette = listOf(
+    Color(0xFF007AFF), // blue
+    Color(0xFF34C759), // green
+    Color(0xFFFF9500), // orange
+    Color(0xFFFF3B30), // red
+    Color(0xFF5856D6), // indigo
+    Color(0xFFAF52DE), // purple
+    Color(0xFFFF2D55), // pink
+    Color(0xFF32ADE6), // cyan
+    Color(0xFF00C7BE), // mint
+    Color(0xFF8E8E93), // grey
 )
 
 val LocalAshStatus = staticCompositionLocalOf { LightStatus }
 
 private val AshShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(22.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(14.dp),
+    extraLarge = RoundedCornerShape(22.dp),
 )
 
 @Composable
