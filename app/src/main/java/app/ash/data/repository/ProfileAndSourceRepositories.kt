@@ -54,6 +54,8 @@ class SourceRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dao: AppSourceDao,
     private val time: TimeProvider,
+    private val settings: SettingsRepository,
+    private val workspace: app.ash.workspace.Workspace,
 ) : SourceRepository {
     override fun observeSources(): Flow<List<AppSource>> = dao.observeAll().map { list -> list.map { it.toDomain() } }
 
@@ -61,7 +63,31 @@ class SourceRepositoryImpl @Inject constructor(
 
     override suspend fun setEnabled(packageName: String, enabled: Boolean) = dao.setEnabled(packageName, enabled)
 
+    override fun observeReadAll(): Flow<Boolean> = settings.settings.map { it.readAllApps }
+
+    /** On: every app is read (each can still be switched off). Off: back to the recognised finance, shopping and travel apps only. */
+    override suspend fun setReadAll(enabled: Boolean) {
+        settings.setReadAllApps(enabled)
+        if (enabled) {
+            dao.enableAll()
+            settings.markReadAllApplied(workspace.id)
+        } else {
+            dao.disableAllExcept(KnownApps.all.map { it.packageName })
+        }
+    }
+
+    /** Turns on apps that were seen before "read all" existed (once per account). */
+    private suspend fun ensureReadAllApplied(): Boolean {
+        val s = settings.current()
+        if (s.readAllApps && workspace.id !in s.readAllAppliedTo) {
+            dao.enableAll()
+            settings.markReadAllApplied(workspace.id)
+        }
+        return s.readAllApps
+    }
+
     override suspend fun discoverInstalledKnownApps(): Int {
+        val readAll = ensureReadAllApplied()
         val pm = context.packageManager
         var added = 0
         for (app in KnownApps.all) {
@@ -72,7 +98,7 @@ class SourceRepositoryImpl @Inject constructor(
                 false
             }
             if (installed && dao.get(app.packageName) == null) {
-                dao.upsert(AppSourceEntity(app.packageName, app.label, app.kind, enabled = false, firstSeenAt = null, lastSeenAt = null))
+                dao.upsert(AppSourceEntity(app.packageName, app.label, app.kind, enabled = readAll, firstSeenAt = null, lastSeenAt = null))
                 added++
             }
         }
@@ -81,23 +107,34 @@ class SourceRepositoryImpl @Inject constructor(
 
     override fun isListenerEnabled(): Boolean = isListenerEnabled(context)
 
+    /**
+     * Without QUERY_ALL_PACKAGES, unknown apps are invisible to PackageManager, so the name is derived
+     * from the package: "com.whatsapp" -> "Whatsapp", "in.amazon.mShop.android.shopping" -> "Amazon".
+     */
+    private fun readableName(packageName: String): String {
+        val skip = setOf("com", "in", "org", "net", "co", "app", "android", "apps", "mobile", "google", "client", "prod", "release")
+        val part = packageName.split('.').firstOrNull { it.lowercase() !in skip && it.length > 1 } ?: packageName
+        return part.replaceFirstChar { it.uppercase() }
+    }
+
     /** Resolves a readable name for a package that posted a notification. */
     fun labelFor(packageName: String): Pair<String, SourceKind> {
         KnownApps.find(packageName)?.let { return it.label to it.kind }
         val label = runCatching {
             val pm = context.packageManager
             pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
-        }.getOrDefault(packageName)
+        }.getOrNull()?.takeIf { it != packageName } ?: readableName(packageName)
         return label to SourceKind.OTHER
     }
 
     suspend fun recordSeen(packageName: String): AppSourceEntity {
+        val readAll = ensureReadAllApplied()
         val now = time.nowMillis()
         val existing = dao.get(packageName)
         if (existing == null) {
             val (label, kind) = labelFor(packageName)
-            // Unknown apps start disabled: ASH only reads sources the user turned on.
-            val entity = AppSourceEntity(packageName, label, kind, enabled = false, firstSeenAt = now, lastSeenAt = now, notificationCount = 1)
+            // With "read all" on (the default) new apps start on; otherwise only apps the user turned on are read.
+            val entity = AppSourceEntity(packageName, label, kind, enabled = readAll, firstSeenAt = now, lastSeenAt = now, notificationCount = 1)
             dao.upsert(entity)
             return entity
         }

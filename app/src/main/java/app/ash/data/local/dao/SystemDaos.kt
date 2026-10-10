@@ -98,6 +98,12 @@ interface AppSourceDao {
     @Query("UPDATE app_sources SET lastSeenAt = :now, notificationCount = notificationCount + 1 WHERE packageName = :packageName")
     suspend fun markSeen(packageName: String, now: Long)
 
+    @Query("UPDATE app_sources SET enabled = 1")
+    suspend fun enableAll()
+
+    @Query("UPDATE app_sources SET enabled = 0 WHERE packageName NOT IN (:keep)")
+    suspend fun disableAllExcept(keep: List<String>)
+
     @Query("SELECT COUNT(*) FROM app_sources WHERE enabled = 1")
     fun observeEnabledCount(): Flow<Int>
 }

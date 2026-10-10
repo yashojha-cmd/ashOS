@@ -130,6 +130,8 @@ interface SourceRepository {
     fun observeSources(): Flow<List<AppSource>>
     fun observeEnabledCount(): Flow<Int>
     suspend fun setEnabled(packageName: String, enabled: Boolean)
+    fun observeReadAll(): Flow<Boolean>
+    suspend fun setReadAll(enabled: Boolean)
     /** Adds installed apps ASH recognises, disabled, so the user can opt in. */
     suspend fun discoverInstalledKnownApps(): Int
     fun isListenerEnabled(): Boolean

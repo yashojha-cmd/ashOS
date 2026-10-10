@@ -73,7 +73,7 @@ class HomeViewModel @Inject constructor(
         val statement = StatementCalculator.compute(txns, 0, time.nowMillis(), time.zone())
         val steps = buildList {
             if (!setup.listener) add(SetupStep.NOTIFICATIONS)
-            if (setup.sources == 0) add(SetupStep.SOURCES)
+            if (setup.sources == 0 && !setup.settings.readAllApps) add(SetupStep.SOURCES)
             if (setup.settings.smsImportedAt == 0L) add(SetupStep.SMS_HISTORY)
             if (setup.documents == 0) add(SetupStep.DOCUMENT)
             if (!setup.settings.appLockEnabled) add(SetupStep.APP_LOCK)

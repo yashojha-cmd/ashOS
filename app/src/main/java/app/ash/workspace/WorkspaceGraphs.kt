@@ -44,7 +44,7 @@ class WorkspaceGraph internal constructor(
         db, db.recordDao(), db.transactionDao(), db.billDao(), db.deliveryDao(), db.tripDao(), db.merchantDao(),
         life, reminders, reminderText, diagnostics, time,
     )
-    val sources = SourceRepositoryImpl(context, db.appSourceDao(), time)
+    val sources = SourceRepositoryImpl(context, db.appSourceDao(), time, settings, workspace)
     val ingestor = NotificationIngestor(sources, db.notificationDao(), records, engine, settings, diagnostics, time)
 }
 

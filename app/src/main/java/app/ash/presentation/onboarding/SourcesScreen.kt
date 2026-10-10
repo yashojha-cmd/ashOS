@@ -33,6 +33,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SourcesViewModel @Inject constructor(private val repo: SourceRepository) : ViewModel() {
     val sources = repo.observeSources().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val readAll = repo.observeReadAll().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
+    fun setReadAll(enabled: Boolean) = viewModelScope.launch { repo.setReadAll(enabled) }
 
     init {
         viewModelScope.launch { repo.discoverInstalledKnownApps() }
@@ -45,17 +48,18 @@ class SourcesViewModel @Inject constructor(private val repo: SourceRepository) :
     }
 }
 
-/** Opt-in allow-list of apps ASH may read (R11). Nothing is pre-ticked. */
+/** Which apps ashOS reads. "Read all apps" is on by default; each app can still be switched off. */
 @Composable
 fun SourcesScreen(onBack: () -> Unit, onDone: () -> Unit) {
     val vm: SourcesViewModel = hiltViewModel()
     val sources by vm.sources.collectAsStateWithLifecycle()
+    val readAll by vm.readAll.collectAsStateWithLifecycle()
     val suggested = sources.filter { it.suggested }
     val others = sources.filterNot { it.suggested }
     AshScaffold(
         title = stringResource(R.string.sources_title),
         onBack = onBack,
-        actions = { if (suggested.any { !it.enabled }) TextButton(onClick = vm::enableSuggested) { Text(stringResource(R.string.sources_select_suggested)) } },
+        actions = { if (!readAll && suggested.any { !it.enabled }) TextButton(onClick = vm::enableSuggested) { Text(stringResource(R.string.sources_select_suggested)) } },
     ) { padding ->
         LazyColumn(contentPadding = padding) {
             item {
@@ -65,6 +69,17 @@ fun SourcesScreen(onBack: () -> Unit, onDone: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                 )
+            }
+            item {
+                GroupedSection(footer = stringResource(if (readAll) R.string.sources_read_all_on else R.string.sources_read_all_off)) {
+                    SwitchRow(
+                        title = stringResource(R.string.sources_read_all),
+                        subtitle = stringResource(R.string.sources_read_all_sub),
+                        checked = readAll,
+                        onCheckedChange = vm::setReadAll,
+                        showDivider = false,
+                    )
+                }
             }
             if (sources.isEmpty()) {
                 item { EmptyState(Icons.Rounded.Apps, stringResource(R.string.sources_empty_title), stringResource(R.string.sources_empty_body)) }

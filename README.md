@@ -121,11 +121,11 @@ app.ash
 
 ### Notification pipeline
 
-`AshNotificationListener` → source allow-list (opt-in per app) → OTP/password filter (never stored) → duplicate check → `RuleBasedIntelligenceEngine` → confidence bands:
+`AshNotificationListener` → source check ("Read all apps" is on by default; any app can be switched off) → OTP/password filter (never stored) → duplicate check → `RuleBasedIntelligenceEngine` → nothing understood: counted and dropped (no text stored or logged) → confidence bands:
 
 - **≥ 0.85**: the record is created automatically, with typed rows (transaction, bill, trip…) and reminders.
 - **0.50–0.85**: the record goes to **Review**. ashOS shows "ashOS found something that may be important. Please confirm." Financial rows are only created after confirmation.
-- **< 0.50**: only the notification log is kept.
+- **< 0.50**: only a notification log row is kept (text only if "keep original text" is on).
 
 ### Priority (Home)
 

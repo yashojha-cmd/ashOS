@@ -12,7 +12,7 @@ Nothing. ashOS does not collect, transmit, sell or share any data. The app is in
 
 Only what you allow, stored locally and encrypted:
 
-- **Notifications** from the apps you turn on (for example bank or shopping apps), and the records ashOS extracts from them. One-time passwords and similar codes are ignored and never stored.
+- **Notifications** from all your apps by default ("Read all apps", which you can turn off or limit per app). ashOS keeps only the records it understands (bills, payments, trips, deliveries, renewals). Notifications it does not understand, such as chats, are counted and dropped: no text, no row. One-time passwords and similar codes are never stored.
 - **Documents** you add to the Vault. They are encrypted with keys protected by your phone's secure hardware.
 - **Reminders, vehicles, insurance policies, warranties, subscriptions and profiles** that you create or confirm.
 - **Local diagnostics and logs.** These are counters and redacted log lines that stay on the phone unless you export them.

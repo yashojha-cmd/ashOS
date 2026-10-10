@@ -81,10 +81,16 @@ class NotificationIngestor @Inject constructor(
                 return Result.DUPLICATE
             }
 
-            val storeText = settings.current().storeOriginalText
             val signal = (outcome as? ParseOutcome.Parsed)?.signal
+            // Nothing understood, or too weak to act on (a chat, a game, a news alert): counted, never stored and never logged with
+            // its text. With every app being read, this keeps personal messages out of the database.
+            if (signal == null || signal.confidence < ConfidencePolicy.REVIEW) {
+                diagnostics.increment(Counters.NOTIFICATIONS_IGNORED)
+                return if (signal == null) Result.NO_MATCH else Result.LOW_CONFIDENCE
+            }
+            val storeText = settings.current().storeOriginalText
             val notificationOutcome = when {
-                signal == null || signal.confidence < ConfidencePolicy.REVIEW -> NotificationOutcome.LOW_CONFIDENCE
+                signal.confidence < ConfidencePolicy.REVIEW -> NotificationOutcome.LOW_CONFIDENCE
                 signal.confidence < ConfidencePolicy.AUTO -> NotificationOutcome.REVIEW
                 else -> NotificationOutcome.RECORD_CREATED
             }
@@ -96,16 +102,16 @@ class NotificationIngestor @Inject constructor(
                     title = if (storeText) raw.title else null,
                     text = if (storeText) raw.text else null,
                     contentHash = hash,
-                    parserId = signal?.parserId,
-                    confidence = signal?.confidence,
+                    parserId = signal.parserId,
+                    confidence = signal.confidence,
                     outcome = notificationOutcome,
                     recordId = null,
                     createdAt = time.nowMillis(),
                 ),
             )
-            AshLogger.sensitive(TAG, "Parsed $packageName -> ${signal?.parserId}:${signal?.confidence} | ${raw.fullText}")
+            AshLogger.sensitive(TAG, "Parsed $packageName -> ${signal.parserId}:${signal.confidence} | ${raw.fullText}")
 
-            if (signal == null || notificationOutcome == NotificationOutcome.LOW_CONFIDENCE) return Result.LOW_CONFIDENCE
+            if (notificationOutcome == NotificationOutcome.LOW_CONFIDENCE) return Result.LOW_CONFIDENCE
             if (historical && notificationOutcome == NotificationOutcome.REVIEW) return Result.LOW_CONFIDENCE
 
             val (recordId, _) = records.createFromSignal(

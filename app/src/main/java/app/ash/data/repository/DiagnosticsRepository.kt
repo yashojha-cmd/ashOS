@@ -16,6 +16,7 @@ object Counters {
     const val NOTIFICATIONS_PROCESSED = "notifications_processed"
     const val NOTIFICATIONS_SENSITIVE = "notifications_sensitive_skipped"
     const val NOTIFICATIONS_DUPLICATE = "notifications_duplicate"
+    const val NOTIFICATIONS_IGNORED = "notifications_ignored"
     const val RECORDS_CREATED = "records_created"
     const val RECORDS_REVIEW = "records_review"
     const val PARSER_CONFIRMATIONS = "parser_confirmations"

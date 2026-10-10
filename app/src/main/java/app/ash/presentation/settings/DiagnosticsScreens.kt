@@ -112,6 +112,7 @@ fun DiagnosticsScreen(onBack: () -> Unit, navigate: (Any) -> Unit) {
                         R.string.diag_confirmations to Counters.PARSER_CONFIRMATIONS,
                         R.string.diag_sensitive to Counters.NOTIFICATIONS_SENSITIVE,
                         R.string.diag_duplicates to Counters.NOTIFICATIONS_DUPLICATE,
+                        R.string.diag_ignored to Counters.NOTIFICATIONS_IGNORED,
                         R.string.diag_ocr to Counters.OCR_DOCUMENTS,
                         R.string.diag_reminders to Counters.REMINDERS_FIRED,
                         R.string.diag_bills_auto to Counters.BILLS_AUTO_PAID,

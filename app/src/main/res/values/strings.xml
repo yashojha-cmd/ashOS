@@ -134,7 +134,7 @@
     <string name="perm_title">Choose access</string>
     <string name="perm_intro">ashOS works without any of these. Each one adds something, and you can turn it off later.</string>
     <string name="perm_notifications_header">Notifications</string>
-    <string name="perm_notifications_footer">With notification access, Android lets ashOS see notifications from apps you turn on below, such as bank SMS, Amazon or IRCTC. ashOS reads them on this phone and never sends them anywhere. OTPs and passwords are ignored.</string>
+    <string name="perm_notifications_footer">With notification access, ashOS reads notifications from all your apps, such as bank SMS, UPI apps, Amazon or IRCTC, on this phone, and never sends them anywhere. It keeps only what it understands; chats and OTPs are never stored. You can switch off any app.</string>
     <string name="perm_notification_access">Notification access</string>
     <string name="perm_notification_access_desc">Lets ashOS organise bills, payments and deliveries</string>
     <string name="perm_on">On</string>
@@ -148,10 +148,10 @@
 
     <!-- Sources -->
     <string name="sources_title">Apps ashOS can read</string>
-    <string name="sources_intro">ashOS only reads notifications from apps you turn on. Everything else is ignored and never stored.</string>
+    <string name="sources_intro">ashOS reads notifications from your apps and keeps only what it understands: bills, payments, trips, deliveries, renewals. Chats and everything else are skipped and never stored. OTPs are never stored.</string>
     <string name="sources_suggested">Suggested on this phone</string>
     <string name="sources_other">Other apps</string>
-    <string name="sources_other_footer">Apps appear here after they post a notification. They stay off until you turn them on.</string>
+    <string name="sources_other_footer">Apps appear here after they post a notification. Switch off any app you never want ashOS to read.</string>
     <string name="sources_select_suggested">Turn on suggested</string>
     <string name="sources_seen">%1$d notifications seen</string>
     <string name="sources_not_seen">No notifications yet</string>
@@ -737,4 +737,9 @@
     <string name="money_all">Transactions, bills and subscriptions</string>
     <string name="money_hidden">Tap to see your balance</string>
     <string name="inbox_open">Messages</string>
+    <string name="sources_read_all">Read all apps</string>
+    <string name="sources_read_all_sub">New apps are read automatically</string>
+    <string name="sources_read_all_on">Every app is read. Switch off individual apps below.</string>
+    <string name="sources_read_all_off">Only the apps switched on below are read.</string>
+    <string name="diag_ignored">Not understood (not stored)</string>
 </resources>

@@ -78,7 +78,7 @@ class NotificationPipelineTest {
         db, db.recordDao(), db.transactionDao(), db.billDao(), db.deliveryDao(), db.tripDao(), db.merchantDao(),
         life, reminders, text, diagnostics, time,
     )
-    private val sources = SourceRepositoryImpl(context, db.appSourceDao(), time)
+    private val sources = SourceRepositoryImpl(context, db.appSourceDao(), time, settings, app.ash.workspace.Workspace.REAL)
     private val engine = RuleBasedIntelligenceEngine()
     private val ingestor = NotificationIngestor(sources, db.notificationDao(), records, engine, settings, diagnostics, time)
     private val search = SearchRepository(
@@ -95,12 +95,15 @@ class NotificationPipelineTest {
     fun fullPipeline() = runBlocking<Unit> {
         val sms = "com.google.android.apps.messaging"
 
-        // 1. A source the user has not enabled is ignored and nothing is stored.
+        // 1. With "read all apps" off, a source the user has not enabled is ignored and nothing is stored.
+        sources.setReadAll(false)
         assertThat(post(sms, "HDFC Bank", "Rs.1,499.00 debited from A/c XX4321 to VPA swiggy@icici. UPI Ref No 628312345678")).isEqualTo(Result.SOURCE_DISABLED)
         assertThat(db.statsDao().notifications().first()).isEqualTo(0)
         assertThat(db.appSourceDao().get(sms)?.enabled).isFalse()
 
-        sources.setEnabled(sms, true)
+        // Turning "read all apps" on (the default) switches on every app seen so far.
+        sources.setReadAll(true)
+        assertThat(db.appSourceDao().get(sms)?.enabled).isTrue()
 
         // 2. Bank debit becomes a transaction automatically.
         assertThat(post(sms, "HDFC Bank", "Rs.1,499.00 debited from A/c XX4321 to VPA swiggy@icici. UPI Ref No 628312345678")).isEqualTo(Result.CREATED)
@@ -137,11 +140,20 @@ class NotificationPipelineTest {
         assertThat(deliveries[0].status).isEqualTo(RecordStatus.HANDLED)
         assertThat(db.deliveryDao().get(deliveries[0].id)?.state).isEqualTo(DeliveryState.DELIVERED)
 
-        // 7. Chit-chat is not turned into a record.
+        // 7. With "read all apps", a new app is read straight away, but chit-chat is dropped: no record,
+        //    no notification row, no text.
         val whatsapp = "com.whatsapp"
-        sources.recordSeen(whatsapp)
-        sources.setEnabled(whatsapp, true)
-        assertThat(post(whatsapp, "Rahul", "Are we meeting today?")).isEqualTo(Result.LOW_CONFIDENCE)
+        val rowsBeforeChat = db.statsDao().notifications().first()
+        assertThat(post(whatsapp, "Rahul", "Are we meeting today?")).isIn(listOf(Result.NO_MATCH, Result.LOW_CONFIDENCE))
+        assertThat(db.appSourceDao().get(whatsapp)?.enabled).isTrue()
+        assertThat(db.statsDao().notifications().first()).isEqualTo(rowsBeforeChat)
+        assertThat(diagnostics.counters.first()[app.ash.data.repository.Counters.NOTIFICATIONS_IGNORED]).isEqualTo(1L)
+        // Switching "read all" off keeps recognised apps (bank SMS, Amazon) and stops the rest.
+        sources.setReadAll(false)
+        assertThat(db.appSourceDao().get(whatsapp)?.enabled).isFalse()
+        assertThat(db.appSourceDao().get(amazon)?.enabled).isTrue()
+        assertThat(post(whatsapp, "Rahul", "Are we meeting tomorrow?")).isEqualTo(Result.SOURCE_DISABLED)
+        sources.setReadAll(true)
 
         // 8. Uncertain finds go to review; no transaction until the user confirms.
         assertThat(post(sms, "Bank", "Rs 1500 aapke khate XX1122 mein jama hua", minutesAgo = 5)).isIn(listOf(Result.REVIEW, Result.CREATED))

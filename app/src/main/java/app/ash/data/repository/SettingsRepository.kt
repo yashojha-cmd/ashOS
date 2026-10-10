@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,10 @@ data class AppSettings(
     val demoDataLoaded: Boolean = false,
     /** When past SMS were last imported (0 = never). */
     val smsImportedAt: Long = 0,
+    /** Read notifications from every app (new apps start on). Off = only apps the user picks. */
+    val readAllApps: Boolean = true,
+    /** Workspaces where "read all" has switched on the apps that existed before it. */
+    val readAllAppliedTo: Set<String> = emptySet(),
     /** User hid the setup checklist on Today. */
     val setupDismissed: Boolean = false,
 )
@@ -55,6 +60,8 @@ class SettingsRepository @Inject constructor(
         val maintenance = longPreferencesKey("last_maintenance")
         val demo = booleanPreferencesKey("demo_data_loaded")
         val smsImported = longPreferencesKey("sms_imported_at")
+        val readAll = booleanPreferencesKey("read_all_apps")
+        val readAllApplied = stringSetPreferencesKey("read_all_applied_to")
         val setupDismissed = booleanPreferencesKey("setup_dismissed")
     }
 
@@ -72,6 +79,8 @@ class SettingsRepository @Inject constructor(
             lastMaintenanceAt = p[Keys.maintenance] ?: 0,
             demoDataLoaded = p[Keys.demo] ?: false,
             smsImportedAt = p[Keys.smsImported] ?: 0,
+            readAllApps = p[Keys.readAll] ?: true,
+            readAllAppliedTo = p[Keys.readAllApplied] ?: emptySet(),
             setupDismissed = p[Keys.setupDismissed] ?: false,
         )
     }
@@ -90,6 +99,8 @@ class SettingsRepository @Inject constructor(
     suspend fun setLastMaintenance(at: Long) = context.dataStore.edit { it[Keys.maintenance] = at }
     suspend fun setDemoDataLoaded(loaded: Boolean) = context.dataStore.edit { it[Keys.demo] = loaded }
     suspend fun setSmsImportedAt(at: Long) = context.dataStore.edit { it[Keys.smsImported] = at }
+    suspend fun setReadAllApps(enabled: Boolean) = context.dataStore.edit { it[Keys.readAll] = enabled }
+    suspend fun markReadAllApplied(workspaceId: String) = context.dataStore.edit { it[Keys.readAllApplied] = (it[Keys.readAllApplied] ?: emptySet()) + workspaceId }
     suspend fun setSetupDismissed(dismissed: Boolean) = context.dataStore.edit { it[Keys.setupDismissed] = dismissed }
 
     suspend fun clear() = context.dataStore.edit { it.clear() }
