@@ -36,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -232,8 +231,8 @@ fun HomeScreen(navigate: (Any) -> Unit) {
     }
 
     if (explainOrder) {
-        ModalBottomSheet(onDismissRequest = { explainOrder = false }) {
-            Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
+        ExplainDialog(onDismiss = { explainOrder = false }) {
+            Column(Modifier.padding(24.dp)) {
                 Text(stringResource(R.string.order_title), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.order_explain), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(12.dp))
@@ -252,8 +251,8 @@ fun HomeScreen(navigate: (Any) -> Unit) {
     }
 
     explainItem?.let { item ->
-        ModalBottomSheet(onDismissRequest = { explainItem = null }) {
-            Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
+        ExplainDialog(onDismiss = { explainItem = null }) {
+            Column(Modifier.padding(24.dp)) {
                 Text(stringResource(R.string.why_title), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(4.dp))
                 Text(item.title, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -505,3 +504,21 @@ private fun WeekStrip(week: List<AttentionItem>, navigate: (Any) -> Unit, onExpl
     }
 }
 
+
+/**
+ * Explanations open in a dialog, not a ModalBottomSheet: Material3 1.4.0's sheet can place itself
+ * before its anchors exist ("offset was read before being initialized"), which crashed the app on the Pixel 7.
+ */
+@Composable
+private fun ExplainDialog(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+            Column {
+                content()
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End).padding(end = 12.dp, bottom = 8.dp)) {
+                    Text(stringResource(R.string.action_done))
+                }
+            }
+        }
+    }
+}
